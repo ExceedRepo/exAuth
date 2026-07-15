@@ -20,8 +20,8 @@
                 <?= csrf_field() ?>
 
                 <div class="mb-3">
-                    <label class="form-label" for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" inputmode="email" autocomplete="email" value="<?= old('email') ?>" required>
+                    <label class="form-label" for="login">Email or Username</label>
+                    <input type="text" class="form-control" id="login" name="login" inputmode="email" autocomplete="username" value="<?= old('login') ?>" required>
                 </div>
 
                 <div class="mb-3">

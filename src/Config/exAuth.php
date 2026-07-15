@@ -29,5 +29,5 @@ class exAuth
     public int $loginAttemptHours = 1;
     public array $validFields = ['email', 'username'];
     public bool $useEmailForLogin = true;
-    public bool $useUsernameForLogin = false;
+    public bool $useUsernameForLogin = true;
 }

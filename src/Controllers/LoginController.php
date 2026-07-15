@@ -40,18 +40,41 @@ class LoginController extends Controller
 
     private function loginPost(): RedirectResponse
     {
-        $email    = (string) ($this->request->getPost('email') ?? '');
-        $username = (string) ($this->request->getPost('username') ?? '');
         $password = (string) ($this->request->getPost('password') ?? '');
 
-        $user = null;
+        // Determine which field(s) are allowed for login, driven by Config/exAuth.
+        $authConfig       = config('exAuth');
+        $validFields      = $authConfig->validFields;
+        $useEmail         = in_array('email', $validFields, true) && $authConfig->useEmailForLogin;
+        $useUsername      = in_array('username', $validFields, true) && $authConfig->useUsernameForLogin;
+        $allowBoth        = $useEmail && $useUsername;
 
-        if ($email !== '') {
-            $user = $this->userProvider->getUserByEmail($email);
+        $loginValue = (string) ($this->request->getPost('login') ?? '');
+
+        if ($loginValue === '' && $useEmail) {
+            $loginValue = (string) ($this->request->getPost('email') ?? '');
+        }
+        if ($loginValue === '' && $useUsername) {
+            $loginValue = (string) ($this->request->getPost('username') ?? '');
         }
 
-        if ($user === null && $username !== '') {
-            $user = $this->userProvider->getUserByUsername($username);
+        $user       = null;
+
+        if ($loginValue !== '') {
+            $isEmail = filter_var($loginValue, FILTER_VALIDATE_EMAIL) !== false;
+
+            if ($allowBoth) {
+                // Detect the field type from the input.
+                if ($isEmail) {
+                    $user = $this->userProvider->getUserByEmail($loginValue);
+                } else {
+                    $user = $this->userProvider->getUserByUsername($loginValue);
+                }
+            } elseif ($useEmail) {
+                $user = $this->userProvider->getUserByEmail($loginValue);
+            } elseif ($useUsername) {
+                $user = $this->userProvider->getUserByUsername($loginValue);
+            }
         }
 
         if ($user === null) {
