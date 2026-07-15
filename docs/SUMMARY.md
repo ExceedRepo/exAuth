@@ -1,6 +1,7 @@
 # Summary
 
 - [Introduction](../README.md)
+- [Setup Guide (Beginner)](SETUP.md)
 - [Authentication](authentication.md)
 - [Authorization](authorization.md)
 - [Authorizable Trait](authorizable_trait.md)
