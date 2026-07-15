@@ -68,13 +68,7 @@ Once installed, perform the following setup:
 
 1. **app/Config/Email.php** — verify **fromName** and **fromEmail** are set (used for password reset emails, etc.).
 
-2. **app/Config/Validation.php** — add the following to the **ruleSets** array:
-
-   ```php
-   \exAuth\Authentication\Passwords\ValidationRules::class,
-   ```
-
-3. Ensure your database is configured correctly, then run migrations:
+2. Ensure your database is configured correctly, then run migrations:
 
    ```shell
    > php spark migrate -all
@@ -132,31 +126,10 @@ $authorize = service('authorization');
 
 **passwords**
 
-Provides direct access to the password validation system. This expandable system supports many of NIST's latest Digital Identity guidelines. Comes with a dictionary of over 620,000 common/leaked passwords.
+Provides direct access to the password validation system.
 
 ```php
 $passwords = service('passwords');
-```
-
-Use the `strong_password` validation rule by adding it to **app/Config/Validation.php**:
-
-```php
-public $ruleSets = [
-    \CodeIgniter\Validation\Rules::class,
-    \CodeIgniter\Validation\FormatRules::class,
-    \CodeIgniter\Validation\FileRules::class,
-    \CodeIgniter\Validation\CreditCardRules::class,
-    \exAuth\Authentication\Passwords\ValidationRules::class,
-];
-```
-
-Now you can use `strong_password` in validation rules:
-
-```php
-$validation->setRules([
-    'username' => 'required',
-    'password' => 'required|strong_password',
-]);
 ```
 
 ## Helper Functions
@@ -218,19 +191,6 @@ $user = $userModel
 ```
 
 User registration handles this automatically, looking to the `$defaultGroup` setting in **Config/exAuth.php** for the group name.
-
-## Toolbar
-
-Add the Collector to **app/Config/Toolbar.php**:
-
-```php
-public $collectors = [
-    \CodeIgniter\Debug\Toolbar\Collectors\Timers::class,
-    \CodeIgniter\Debug\Toolbar\Collectors\Database::class,
-    ...
-    \exAuth\Collectors\Auth::class,
-];
-```
 
 ## Restricting by Route
 

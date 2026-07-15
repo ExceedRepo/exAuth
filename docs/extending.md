@@ -37,7 +37,11 @@ See the `$views` property in `exAuth/Config/exAuth.php` for the default view pat
 
 ## Routes
 
-Copy `exAuth/Config/Routes.php` to `app/Config/Routes.php` and adjust the namespace. Override any route mapping you need.
+Shield handles route registration automatically via `service('auth')->routes($routes)`.
+To customize routes, publish Shield's AuthRoutes config:
+```bash
+cp vendor/codeigniter4/shield/src/Config/AuthRoutes.php app/Config/
+```
 
 ## Models
 
@@ -82,13 +86,11 @@ Add your custom fields to the database using a new migration.
 
 You can add or extend the filters in `app/Config/Filters.php`:
 
+Filters are already auto-registered by exAuth's `Registrar`. You don't need to add them manually.
+To add a custom filter, you can still add to `app/Config/Filters.php`:
+
 ```php
 public $aliases = [
-    'login'     => \exAuth\Filters\SessionAuth::class,
-    'tokens'    => \exAuth\Filters\TokenAuth::class,
-    'jwt'       => \exAuth\Filters\JwtAuth::class,
-    'permission' => \exAuth\Filters\PermissionFilter::class,
-    // my custom filter
     'admin'     => \App\Filters\AdminFilter::class,
 ];
 ```
@@ -98,6 +100,5 @@ public $aliases = [
 If you want to provide a custom `authentication` or `authorization` implementation, create a class that implements the appropriate interface:
 
 - `exAuth\Authentication\AuthenticatorInterface`
-- `exAuth\Authorization\AuthorizeInterface`
 
 Then register it in `Config/Services.php` or via the `Registrar` pattern.

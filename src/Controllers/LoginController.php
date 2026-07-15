@@ -7,6 +7,8 @@ namespace exAuth\Controllers;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\I18n\Time;
+use exAuth\Authentication\Authenticators\Session;
+use exAuth\Entities\User;
 use exAuth\Models\UserIdentityModel;
 use exAuth\Models\UserModel;
 
@@ -64,9 +66,8 @@ class LoginController extends Controller
                 ->with('error', lang('exAuth.logInLocked'));
         }
 
-        $sessionAuth = \exAuth\Authentication\Authenticators\Session::class;
-        $session = new $sessionAuth();
-        $userEntity = new \exAuth\Entities\User();
+        $session = new Session();
+        $userEntity = new User();
         $userEntity->id = $user['id'];
         $session->login($userEntity);
 

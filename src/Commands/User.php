@@ -212,7 +212,7 @@ class User extends BaseCommand
         $userModel = model(UserModel::class);
 
         if ($userid !== 0) {
-            $user = $userModel->findById($userid);
+            $user = $userModel->findUserById($userid);
             $this->checkUserExists($user);
         } else {
             $user = $this->findUser('Delete user', $username, $email);
@@ -384,6 +384,6 @@ class User extends BaseCommand
 
         $this->checkUserExists($user);
 
-        return $userModel->findById($user['id']);
+        return $userModel->findUserById($user['id']);
     }
 }

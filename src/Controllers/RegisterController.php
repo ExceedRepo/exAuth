@@ -6,6 +6,8 @@ namespace exAuth\Controllers;
 
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RedirectResponse;
+use exAuth\Authentication\Authenticators\Session;
+use exAuth\Entities\User;
 use exAuth\Models\UserModel;
 
 class RegisterController extends Controller
@@ -61,10 +63,10 @@ class RegisterController extends Controller
 
         $user = $this->userProvider->getUserByEmail($email);
 
-        $sessionAuth = new \exAuth\Authentication\Authenticators\Session();
-        $userEntity = new \exAuth\Entities\User();
+        $session = new Session();
+        $userEntity = new User();
         $userEntity->id = $user['id'];
-        $sessionAuth->login($userEntity);
+        $session->login($userEntity);
 
         return redirect()->to('/')->with('message', lang('exAuth.registerSuccess'));
     }

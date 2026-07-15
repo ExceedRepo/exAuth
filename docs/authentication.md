@@ -151,24 +151,4 @@ $user = ex_current_user();
 $id   = ex_user_id();
 ```
 
-## Password Validation
 
-Password validators are configured in `Config/exAuth.php`. The `strong_password` validation rule can be used:
-
-```php
-$validation->setRules([
-    'password' => 'required|strong_password',
-]);
-```
-
-To be able to use this rule, add the following to `app/Config/Validation.php`:
-
-```php
-public $ruleSets = [
-    \CodeIgniter\Validation\Rules::class,
-    \CodeIgniter\Validation\FormatRules::class,
-    \CodeIgniter\Validation\FileRules::class,
-    \CodeIgniter\Validation\CreditCardRules::class,
-    \exAuth\Authentication\Passwords\ValidationRules::class,
-];
-```
