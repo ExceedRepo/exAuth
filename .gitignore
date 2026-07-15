@@ -1,5 +1,7 @@
 vendor/
 build/
+AGENTS.md
+ANALISIS.md
 .phpunit.cache
 .php-cs-fixer.cache
 *.swp
