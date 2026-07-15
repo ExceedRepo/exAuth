@@ -19,7 +19,9 @@ class RegisterController extends Controller
 
     public function register()
     {
-        if (logged_in()) {
+        helper('exAuth');
+
+        if (ex_logged_in()) {
             return redirect()->to('/');
         }
 
@@ -59,7 +61,10 @@ class RegisterController extends Controller
 
         $user = $this->userProvider->getUserByEmail($email);
 
-        auth()->login($user['id']);
+        $sessionAuth = new \exAuth\Authentication\Authenticators\Session();
+        $userEntity = new \exAuth\Entities\User();
+        $userEntity->id = $user['id'];
+        $sessionAuth->login($userEntity);
 
         return redirect()->to('/')->with('message', lang('exAuth.registerSuccess'));
     }

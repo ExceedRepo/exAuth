@@ -23,7 +23,9 @@ class LoginController extends Controller
 
     public function login()
     {
-        if (logged_in()) {
+        helper('exAuth');
+
+        if (ex_logged_in()) {
             return redirect()->to('/');
         }
 
@@ -62,7 +64,11 @@ class LoginController extends Controller
                 ->with('error', lang('exAuth.logInLocked'));
         }
 
-        auth()->login($user['id']);
+        $sessionAuth = \exAuth\Authentication\Authenticators\Session::class;
+        $session = new $sessionAuth();
+        $userEntity = new \exAuth\Entities\User();
+        $userEntity->id = $user['id'];
+        $session->login($userEntity);
 
         $this->userProvider->update($user['id'], ['last_login' => Time::now()->toDateTimeString()]);
 
@@ -71,7 +77,8 @@ class LoginController extends Controller
 
     public function logout(): RedirectResponse
     {
-        logout();
+        helper('exAuth');
+        ex_logout();
         return redirect()->to('/')->with('message', lang('exAuth.logOutSuccess'));
     }
 

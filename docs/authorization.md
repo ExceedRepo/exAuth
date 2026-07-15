@@ -22,28 +22,10 @@ $authorize->inGroup(['admin', 'editor'], $userId);
 $authorize->inGroup(3, $userId);
 ```
 
-Helper shorthand:
+Helper shorthand (via the User entity):
 
 ```php
-in_groups('admin');
-in_groups(['admin', 'editor']);
-```
-
-## Checking Permissions
-
-The permission can be an ID or name. Supports wildcard matching.
-
-```php
-$authorize->hasPermission('users.create', $userId);
-$authorize->hasPermission('admin.*', $userId);
-$authorize->hasPermission(5, $userId);
-```
-
-Helper shorthand:
-
-```php
-has_permission('users.create');
-has_permission('admin.*');
+ex_current_user()->inGroup('admin');
 ```
 
 ## Managing Group Membership
@@ -136,6 +118,6 @@ Examples:
 '**'
 
 // matches
-has_permission('admin.reports')   // true if admin.* allowed
-has_permission('users.view')       // true if *.view allowed
+ex_current_user()->can('admin.reports')   // true if admin.* allowed
+ex_current_user()->can('users.view')       // true if *.view allowed
 ```

@@ -11,7 +11,7 @@ trait Bannable
         $this->status = 'banned';
         $this->status_message = $reason;
 
-        $users = auth()->getProvider();
+        $users = model(\exAuth\Models\UserModel::class);
 
         $users->save($this);
     }
@@ -21,7 +21,7 @@ trait Bannable
         $this->status = null;
         $this->status_message = null;
 
-        $users = auth()->getProvider();
+        $users = model(\exAuth\Models\UserModel::class);
 
         $users->save($this);
     }

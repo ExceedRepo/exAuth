@@ -165,54 +165,44 @@ exAuth comes with its own helper. Load it with `helper('exAuth');`.
 
 > **Hint**: Add `'exAuth'` to the `$helpers` property of **BaseController.php** to have it globally available. The auth filters all pre-load this helper on filtered routes.
 
-**auth()**
+**ex_auth()**
 
-Returns the authentication service instance.
+Returns the authentication service instance (factory).
 
 ```php
-auth()
+ex_auth()
 ```
 
-**logged_in()**
+**ex_logged_in()**
 
 Checks if any user is logged in. Returns `true` or `false`.
 
 ```php
-logged_in()
+ex_logged_in()
 ```
 
-**user()**
+**ex_current_user()**
 
 Returns the User entity for the current logged in user, or `null`.
 
 ```php
-user()
+ex_current_user()
 ```
 
-**user_id()**
+**ex_user_id()**
 
 Returns the current user's integer ID, or `null`.
 
 ```php
-user_id()
+ex_user_id()
 ```
 
-**in_groups()**
+**ex_logout()**
 
-Ensures the current user is in at least one of the passed groups. Accepts group IDs or names, as a single item or array.
-
-```php
-in_groups('admin')
-in_groups(['admin', 'editor'])
-```
-
-**has_permission()**
-
-Ensures the current user has at least one of the passed permissions. Supports wildcard matching.
+Logs out the current user.
 
 ```php
-has_permission('users.create')
-has_permission('admin.*')
+ex_logout()
 ```
 
 ## Users
@@ -246,23 +236,18 @@ public $collectors = [
 
 ### Filter Aliases
 
-Add to **app/Config/Filters.php**:
+Filters are auto-registered via the `Registrar` pattern. You do **not** need to add them to `Config/Filters.php` manually.
+
+Available filter aliases:
 
 ```php
-'login'      => \exAuth\Filters\LoginFilter::class,
-'role'       => \exAuth\Filters\RoleFilter::class,
-'permission' => \exAuth\Filters\PermissionFilter::class,
-```
-
-Additional exAuth filters:
-
-```php
-'session'    => \exAuth\Filters\SessionAuth::class,
-'tokens'     => \exAuth\Filters\TokenAuth::class,
-'hmac'       => \exAuth\Filters\HmacAuth::class,
-'jwt'        => \exAuth\Filters\JWTAuth::class,
-'chain'      => \exAuth\Filters\ChainAuth::class,
-'group'      => \exAuth\Filters\GroupFilter::class,
+'session'    => Session-based auth (redirect to /login if not logged in)
+'tokens'     => Bearer token auth (returns 401 JSON on failure)
+'hmac'       => HMAC signature auth (returns 401 JSON on failure)
+'jwt'        => JWT Bearer token auth (returns 401 JSON on failure)
+'chain'      => Tries session, tokens, jwt, hmac in sequence
+'group'      => Checks group membership
+'permission' => Checks permissions
 ```
 
 ### Global Restrictions
@@ -291,20 +276,20 @@ public $globals = [
 
 ```php
 $routes->get('admin/users', 'UserController::index', ['filter' => 'permission:users.manage']);
-$routes->get('admin/users', 'UserController::index', ['filter' => 'role:admin,superadmin']);
+$routes->get('admin/users', 'UserController::index', ['filter' => 'group:admin,superadmin']);
 ```
 
 ### Route Groups
 
 ```php
-$routes->group('admin', ['filter' => 'role:admin,superadmin'], function($routes) {
+$routes->group('admin', ['filter' => 'group:admin,superadmin'], function($routes) {
     ...
 });
 ```
 
 ### Chain Authentication Filter
 
-Use the ChainAuth filter to try multiple authenticators in sequence:
+Use the chain filter to try multiple authenticators in sequence:
 
 ```php
 $routes->get('api/profile', 'Profile::index', ['filter' => 'chain:session,tokens,jwt']);

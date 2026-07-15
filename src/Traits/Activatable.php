@@ -8,14 +8,14 @@ trait Activatable
 {
     public function activate(): void
     {
-        $users = auth()->getProvider();
+        $users = model(\exAuth\Models\UserModel::class);
 
         $users->update($this->id, ['active' => 1]);
     }
 
     public function deactivate(): void
     {
-        $users = auth()->getProvider();
+        $users = model(\exAuth\Models\UserModel::class);
 
         $users->update($this->id, ['active' => 0]);
     }

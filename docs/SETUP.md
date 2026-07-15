@@ -322,7 +322,7 @@ also publish Shield's redirect config. The simplest approach is to set it in
 Shield's config.
 
 > **For now**, just visit `/dashboard` manually after login. Or you can change
-> the redirect URL by calling `auth()->loginRedirect()` in your controller.
+> the redirect URL by calling `ex_auth()->loginRedirect()` in your controller.
 > We'll cover customization in a later guide.
 
 ---
@@ -506,11 +506,11 @@ You forgot to run migrations:
 php spark migrate --all
 ```
 
-### "Cannot redeclare function auth()" or "Cannot redeclare function user_id()"
+### "Cannot redeclare function ex_auth()" or "Call to undefined function ex_auth()"
 
-You're probably loading both Shield's `auth_helper` and exAuth's `exAuth_helper`.
-This shouldn't happen with the `ex_` prefix (see, we told you we learned from
-our mistakes). Make sure you're using `ex_auth()`, `ex_logged_in()`, etc.
+You might be loading the wrong helper. exAuth's helper is `exAuth`, not `auth`.
+Make sure `'exAuth'` is in the `$helpers` array in `app/Config/Autoload.php`.
+All exAuth helpers use the `ex_` prefix.
 
 ### Login redirect keeps going to "/" instead of my dashboard
 

@@ -15,7 +15,7 @@ $auth = service('authentication', 'jwt');
 You can also use the helper:
 
 ```php
-$auth = auth();
+$auth = ex_auth();
 ```
 
 ## Authenticator Interface
@@ -138,17 +138,17 @@ if ($auth->check()) {
 }
 ```
 
-The helper `logged_in()` is shorthand:
+The helper `ex_logged_in()` is shorthand:
 
 ```php
-if (logged_in()) { ... }
+if (ex_logged_in()) { ... }
 ```
 
 ## Current User
 
 ```php
-$user = user();
-$id   = user_id();
+$user = ex_current_user();
+$id   = ex_user_id();
 ```
 
 ## Password Validation

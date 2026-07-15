@@ -23,7 +23,9 @@ class MagicLinkController extends Controller
 
     public function showForm()
     {
-        if (logged_in()) {
+        helper('exAuth');
+
+        if (ex_logged_in()) {
             return redirect()->to('/');
         }
 
@@ -78,7 +80,10 @@ class MagicLinkController extends Controller
 
         $this->identityModel->delete($identity->id);
 
-        auth()->login($identity->user_id);
+        $sessionAuth = new \exAuth\Authentication\Authenticators\Session();
+        $userEntity = new \exAuth\Entities\User();
+        $userEntity->id = $identity->user_id;
+        $sessionAuth->login($userEntity);
 
         return redirect()->to('/')->with('message', lang('exAuth.logInSuccess'));
     }

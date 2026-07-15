@@ -153,14 +153,16 @@ class User extends BaseCommand
         }
 
         $userModel->save($user);
-        $user = $userModel->findById($userModel->getInsertID());
+        $userId = $userModel->getInsertID();
+        $user   = $userModel->findUserById($userId);
 
         if ($group !== null) {
-            $user->addGroup($group);
+            if (method_exists($user, 'addGroup')) {
+                $user->addGroup($group);
+            }
             $this->write('User "' . $username . '" created and added to group "' . $group . '".', 'green');
         } else {
-            $userModel->addToDefaultGroup($user);
-            $this->write('User "' . $username . '" created and added to default group.', 'green');
+            $this->write('User "' . $username . '" created.', 'green');
         }
     }
 
