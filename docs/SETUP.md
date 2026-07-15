@@ -186,12 +186,12 @@ php spark migrate --all
 
 This creates the following tables:
 - `users` — where user accounts live
-- `auth_identities` — stores email/password, access tokens, etc.
-- `auth_logins` — keeps track of login attempts (for rate limiting)
-- `auth_token_logins` — same, but for token-based logins
+- `auth_identities` — stores tokens, magic links, reset tokens, etc.
+- `auth_logins` — keeps track of login attempts
 - `auth_remember_tokens` — for the "Remember Me" feature
-- `auth_groups_users` — who belongs to which group
-- `auth_permissions_users` — who has which permission (overrides group permissions)
+- `auth_groups_users` — who belongs to which group (group name stored as text)
+- `auth_permissions_users` — direct per-user permissions
+- `auth_users_groups` — additional user/group mapping
 
 Don't worry, you don't need to memorize all of them. Just know they're there,
 working hard so you don't have to.
@@ -311,19 +311,25 @@ $routes->group('dashboard', ['filter' => 'session'], static function ($routes) {
 This protects the entire `/dashboard` route group — only logged-in users can
 access it. Unauthenticated users will be redirected to `/login`.
 
-### 6.5 Set Redirect After Login
+### 6.5 Redirect After Login
 
-By default, exAuth/Shield redirects to `/` after login. To redirect to your
-dashboard instead, add or edit `app/Config/exAuth.php` (if published) or use
-the Shield config approach:
+By default, exAuth redirects to `/` (your home page) after a successful login
+or registration. The simplest approach for a beginner is to put your dashboard
+content at the `/` route, or redirect from your home controller:
 
-Actually, since exAuth uses Shield's Auth config for redirects, you need to
-also publish Shield's redirect config. The simplest approach is to set it in
-Shield's config.
+```php
+// app/Controllers/Home.php
+public function index()
+{
+    if (ex_logged_in()) {
+        return redirect()->to('/dashboard');
+    }
+    return redirect()->to('/login');
+}
+```
 
-> **For now**, just visit `/dashboard` manually after login. Or you can change
-> the redirect URL by calling `ex_auth()->loginRedirect()` in your controller.
-> We'll cover customization in a later guide.
+> To change the built-in redirect target, publish the controllers and edit the
+> `redirect()->to('/')` calls — but the home-controller approach above is easier.
 
 ---
 
@@ -514,20 +520,9 @@ All exAuth helpers use the `ex_` prefix.
 
 ### Login redirect keeps going to "/" instead of my dashboard
 
-By default, Shield redirects to `/` after login. To change this, you need to
-publish and customize Shield's `Config\Auth.php`:
-```bash
-cp vendor/codeigniter4/shield/src/Config/Auth.php app/Config/
-```
-Then edit `app/Config/Auth.php` and change:
-```php
-public array $redirects = [
-    'register' => '/',
-    'login'    => '/dashboard',  // <-- Change this
-    'logout'   => 'login',
-    // ...
-];
-```
+exAuth redirects to `/` after login by default. The easiest fix is to make your
+home controller (`/`) redirect logged-in users to your dashboard — see
+[section 6.5](#65-redirect-after-login).
 
 ### I still can't log in / register and I've tried everything
 

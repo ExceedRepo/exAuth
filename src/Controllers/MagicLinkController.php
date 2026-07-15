@@ -36,7 +36,7 @@ class MagicLinkController extends Controller
 
     public function sendLink(): RedirectResponse
     {
-        $email = $this->request->getPost('email');
+        $email = (string) ($this->request->getPost('email') ?? '');
         $user  = $this->userProvider->getUserByEmail($email);
 
         if ($user === null) {
@@ -50,10 +50,10 @@ class MagicLinkController extends Controller
         $token = random_string('crypto', 20);
 
         $this->identityModel->insert([
-            'user_id' => $user['id'],
-            'type'    => 'magic_link',
-            'secret'  => $token,
-            'expires' => Time::now()->addMinutes(15)->toDateTimeString(),
+            'user_id'    => $user['id'],
+            'type'       => 'magic_link',
+            'secret'     => $token,
+            'expires_at' => Time::now()->addMinutes(15)->toDateTimeString(),
         ]);
 
         return view('exAuth\magic_link_sent');

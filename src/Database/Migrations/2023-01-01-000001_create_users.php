@@ -12,7 +12,7 @@ class CreateUsers extends Migration
             'id'            => ['type' => 'INT', 'constraint' => 11, 'auto_increment' => true],
             'email'         => ['type' => 'VARCHAR', 'constraint' => 255],
             'username'      => ['type' => 'VARCHAR', 'constraint' => 30, 'null' => true],
-            'password_hash' => ['type' => 'VARCHAR', 'constraint' => 255],
+            'password'      => ['type' => 'VARCHAR', 'constraint' => 255],
             'first_name'    => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'last_name'     => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'active'        => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],

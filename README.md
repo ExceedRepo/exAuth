@@ -58,79 +58,52 @@ $psr4 = [
 ];
 ```
 
-### Upgrading
-
-Check the [Changes Docs](docs/changes.md) for upgrade steps between versions.
-
 ## Configuration
 
-Once installed, perform the following setup:
+> **New to exAuth?** Follow the step-by-step [Setup Guide](docs/SETUP.md) — it
+> takes you from zero to a working login/register/logout flow.
 
-1. **app/Config/Email.php** — verify **fromName** and **fromEmail** are set (used for password reset emails, etc.).
+The fastest way to configure everything is the setup command:
 
-2. Ensure your database is configured correctly, then run migrations:
+```shell
+php spark exauth:setup
+```
 
-   ```shell
-   > php spark migrate -all
-   ```
-
-> Note: This library uses your application's cache settings to reduce database lookups. Use a cache engine other than `dummy` for optimal performance. The `GroupModel` and `PermissionModel` handle caching and invalidation automatically.
+This publishes config, registers the `exAuth` helper, adds the auth routes,
+adjusts CSRF settings, and runs migrations. To do it manually, see the
+[Setup Guide](docs/SETUP.md#4-manual-setup).
 
 ## Overview
 
-When first installed, exAuth provides all of the basic authentication services: user registration, login/logout, and forgotten password flows.
+When installed, exAuth provides basic authentication: user registration,
+login/logout, forgotten password, magic-link login, and route protection
+via filters.
 
-**"Remember Me"** is disabled by default. Enable it by setting `$allowRemembering` to `true` in **Config/exAuth.php**.
+Routes are registered by adding this line to **app/Config/Routes.php**:
 
-### Routes
-
-Routes are defined in **Config/Routes.php**. This file is automatically located by CodeIgniter. To customize, copy the file to **app/Config**, update the namespace, and make changes there. You may also use the `$reservedRoutes` property of **Config/exAuth** to redirect internal route names.
+```php
+service('auth')->routes($routes);
+```
 
 ### Views
 
-Default views are based on Bootstrap 4. Override any view by editing **Config/exAuth.php** and changing the appropriate value in the `$views` variable:
-
-```php
-public $views = [
-    'login'    => 'exAuth\Views\login',
-    'register' => 'exAuth\Views\register',
-    'forgot'   => 'exAuth\Views\forgot',
-    'reset'    => 'exAuth\Views\reset',
-    'emailForgot' => 'exAuth\Views\emails\forgot',
-];
-```
+Default views live in `src/Views` and are based on Bootstrap 5. To customize
+them, copy the files into your app's `Views` directory and adjust the
+`view(...)` calls, or override the paths in `Config/exAuth.php`.
 
 ## Services
 
-**authentication**
+**auth**
 
-Provides access to the authentication library. Default is "session" authenticator.
-
-```php
-$authenticate = service('authentication');
-```
-
-You can specify the library as the first argument:
+Provides access to the exAuth facade. Its main job is registering routes:
 
 ```php
-$authenticate = service('authentication', 'jwt');
+// app/Config/Routes.php
+service('auth')->routes($routes);
 ```
 
-**authorization**
-
-Provides access to the authorization library (groups and permissions).
-
-```php
-$authorize = service('authorization');
-```
-
-**passwords**
-
-Provides direct access to the password validation system.
-
-```php
-$passwords = service('passwords');
-```
+For login state and the current user, use the helper functions below
+(`ex_logged_in()`, `ex_current_user()`, etc.).
 
 ## Helper Functions
 
@@ -180,17 +153,15 @@ ex_logout()
 
 ## Users
 
-exAuth uses CodeIgniter Entities for the User object. This class provides automatic password hashing, ban/unban utility methods, password reset hash generation, and more.
+exAuth uses CodeIgniter Entities for the User object. User accounts live in the
+`users` table (email, username, password, active, status, etc.).
 
-The **UserModel** can automatically assign a role during user creation. Pass the group name to the `withGroup()` method prior to `insert()` or `save()`:
+Assign a user to a group by inserting into the `auth_groups_users` table (the
+group name is stored as text), or use the CLI:
 
-```php
-$user = $userModel
-    ->withGroup('guests')
-    ->insert($data);
+```bash
+php spark exauth:user addgroup -n johndoe -g admin
 ```
-
-User registration handles this automatically, looking to the `$defaultGroup` setting in **Config/exAuth.php** for the group name.
 
 ## Restricting by Route
 

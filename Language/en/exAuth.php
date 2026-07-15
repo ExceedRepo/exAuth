@@ -11,6 +11,7 @@ return [
     'registerSuccess'   => 'Registered successfully.',
     'registerDisabled'  => 'Registration is disabled.',
     'errorInvalidToken' => 'The provided token is invalid.',
+    'errorTokenInvalid' => 'The provided token is invalid.',
     'errorTokenExpired' => 'The provided token is expired.',
     'errorAccessDenied' => 'Access denied.',
     'permDenied'        => 'You do not have the required permission.',

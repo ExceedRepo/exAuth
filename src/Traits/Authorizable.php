@@ -6,43 +6,38 @@ namespace exAuth\Traits;
 
 trait Authorizable
 {
-    protected array $groupCache = [];
+    protected ?array $groupCache = null;
 
-    protected array $permissionCache = [];
+    protected ?array $permissionCache = null;
+
+    /**
+     * @param string|list<string> $group
+     */
+    public function inGroup($group): bool
+    {
+        $this->populateGroups();
+
+        $groups = is_array($group) ? $group : [$group];
+
+        return array_intersect($groups, $this->groupCache) !== [];
+    }
 
     public function can(string $permission): bool
     {
         $this->populatePermissions();
 
-        if (in_array('*', $this->permissionCache, true)) {
-            return true;
-        }
-
-        if (in_array($permission, $this->permissionCache, true)) {
-            return true;
-        }
-
-        $this->populateGroups();
-
-        $matrix = setting('AuthGroups.matrix');
-
-        if ($matrix === null) {
-            return false;
-        }
-
-        foreach ($this->groupCache as $group) {
-            $perms = $matrix[$group] ?? [];
-
-            if (in_array('*', $perms, true)) {
-                return true;
-            }
-
-            if (in_array($permission, $perms, true)) {
+        foreach ($this->permissionCache as $owned) {
+            if ($this->permissionMatches($owned, $permission)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->can($permission);
     }
 
     public function canAny(array $permissions): bool
@@ -54,13 +49,6 @@ trait Authorizable
         }
 
         return false;
-    }
-
-    public function hasRole(string $role): bool
-    {
-        $this->populateGroups();
-
-        return in_array($role, $this->groupCache, true);
     }
 
     public function getGroups(): array
@@ -79,27 +67,72 @@ trait Authorizable
 
     protected function populateGroups(): void
     {
-        if ($this->id === null) {
+        if ($this->groupCache !== null) {
+            return;
+        }
+
+        if (empty($this->id)) {
             $this->groupCache = [];
 
             return;
         }
 
-        $groupModel = model(\exAuth\Models\GroupModel::class);
+        $rows = db_connect()->table('auth_groups_users')
+            ->select('group_id')
+            ->where('user_id', $this->id)
+            ->get()
+            ->getResultArray();
 
-        $this->groupCache = $groupModel->getForUser($this);
+        $this->groupCache = array_column($rows, 'group_id');
     }
 
     protected function populatePermissions(): void
     {
-        if ($this->id === null) {
+        if ($this->permissionCache !== null) {
+            return;
+        }
+
+        if (empty($this->id)) {
             $this->permissionCache = [];
 
             return;
         }
 
-        $permissionModel = model(\exAuth\Models\PermissionModel::class);
+        // Direct per-user permissions.
+        $rows = db_connect()->table('auth_permissions_users')
+            ->select('permission')
+            ->where('user_id', $this->id)
+            ->get()
+            ->getResultArray();
 
-        $this->permissionCache = $permissionModel->getForUser($this);
+        $permissions = array_column($rows, 'permission');
+
+        // Permissions inherited from the user's groups (from AuthGroups config).
+        $this->populateGroups();
+
+        $config = config('AuthGroups');
+
+        foreach ($this->groupCache as $groupName) {
+            if (isset($config->groups[$groupName]['permissions']) && is_array($config->groups[$groupName]['permissions'])) {
+                $permissions = array_merge($permissions, $config->groups[$groupName]['permissions']);
+            }
+        }
+
+        $this->permissionCache = array_values(array_unique($permissions));
+    }
+
+    protected function permissionMatches(string $owned, string $wanted): bool
+    {
+        if ($owned === $wanted || $owned === '*' || $owned === '**') {
+            return true;
+        }
+
+        if (str_ends_with($owned, '*')) {
+            $prefix = rtrim(substr($owned, 0, -1), '.');
+
+            return $prefix === '' || $wanted === $prefix || str_starts_with($wanted, $prefix . '.');
+        }
+
+        return false;
     }
 }

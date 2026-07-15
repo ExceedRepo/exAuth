@@ -36,10 +36,10 @@ class RegisterController extends Controller
 
     private function registerPost(): RedirectResponse
     {
-        $email           = $this->request->getPost('email');
-        $username        = $this->request->getPost('username');
-        $password        = $this->request->getPost('password');
-        $passwordConfirm = $this->request->getPost('password_confirm');
+        $email           = (string) ($this->request->getPost('email') ?? '');
+        $username        = (string) ($this->request->getPost('username') ?? '');
+        $password        = (string) ($this->request->getPost('password') ?? '');
+        $passwordConfirm = (string) ($this->request->getPost('password_confirm') ?? '');
 
         if ($password !== $passwordConfirm) {
             return redirect()->back()->withInput()

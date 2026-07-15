@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use exAuth\Auth;
-use exAuth\Authentication\Authentication;
 use exAuth\Authentication\Authenticators\Session;
 use exAuth\Entities\User;
 
@@ -15,14 +14,9 @@ if (! function_exists('ex_auth')) {
 }
 
 if (! function_exists('ex_session')) {
-    function ex_session(): ?Session
+    function ex_session(): Session
     {
-        try {
-            $instance = Authentication::factory('session');
-            return $instance instanceof Session ? $instance : null;
-        } catch (\RuntimeException) {
-            return null;
-        }
+        return new Session();
     }
 }
 

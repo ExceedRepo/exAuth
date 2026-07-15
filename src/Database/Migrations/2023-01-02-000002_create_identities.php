@@ -12,7 +12,7 @@ class CreateIdentities extends Migration
             'id'            => ['type' => 'INT', 'constraint' => 11, 'auto_increment' => true],
             'user_id'       => ['type' => 'INT', 'constraint' => 11],
             'type'          => ['type' => 'VARCHAR', 'constraint' => 255],
-            'name'          => ['type' => 'VARCHAR', 'constraint' => 255],
+            'name'          => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'secret'        => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'secret2'       => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
             'extras'        => ['type' => 'TEXT', 'null' => true],

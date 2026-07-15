@@ -9,4 +9,3 @@
 - [Events](events.md)
 - [Extending](extending.md)
 - [Testing](testing.md)
-- [Changelog](changelog.md)

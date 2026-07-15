@@ -40,10 +40,18 @@ class LoginController extends Controller
 
     private function loginPost(): RedirectResponse
     {
-        $user = $this->userProvider->getUserByEmail($this->request->getPost('email'));
+        $email    = (string) ($this->request->getPost('email') ?? '');
+        $username = (string) ($this->request->getPost('username') ?? '');
+        $password = (string) ($this->request->getPost('password') ?? '');
 
-        if ($user === null) {
-            $user = $this->userProvider->getUserByUsername($this->request->getPost('username'));
+        $user = null;
+
+        if ($email !== '') {
+            $user = $this->userProvider->getUserByEmail($email);
+        }
+
+        if ($user === null && $username !== '') {
+            $user = $this->userProvider->getUserByUsername($username);
         }
 
         if ($user === null) {
@@ -51,7 +59,7 @@ class LoginController extends Controller
                 ->with('error', lang('exAuth.logInInvalid'));
         }
 
-        if (! password_verify($this->request->getPost('password'), $user['password'])) {
+        if (! password_verify($password, (string) $user['password'])) {
             return redirect()->back()->withInput()
                 ->with('error', lang('exAuth.logInInvalid'));
         }
@@ -94,7 +102,7 @@ class LoginController extends Controller
 
     private function forgotPasswordPost(): RedirectResponse
     {
-        $email = $this->request->getPost('email');
+        $email = (string) ($this->request->getPost('email') ?? '');
         $user  = $this->userProvider->getUserByEmail($email);
 
         if ($user === null) {
@@ -108,10 +116,10 @@ class LoginController extends Controller
         $token = random_string('crypto', 32);
 
         $this->identityProvider->insert([
-            'user_id' => $user['id'],
-            'type'    => 'reset_token',
-            'secret'  => $token,
-            'expires' => Time::now()->addHours(1)->toDateTimeString(),
+            'user_id'    => $user['id'],
+            'type'       => 'reset_token',
+            'secret'     => $token,
+            'expires_at' => Time::now()->addHours(1)->toDateTimeString(),
         ]);
 
         return redirect()->to('login')->with('message', lang('exAuth.logInInvalid'));

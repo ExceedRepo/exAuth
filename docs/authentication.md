@@ -1,5 +1,11 @@
 # Authentication
 
+> **Note:** This document describes the broader authenticator design. For the
+> practical, supported day-to-day flow (login, register, logout, current user),
+> use the helper functions shown in the [Setup Guide](SETUP.md) —
+> `ex_logged_in()`, `ex_current_user()`, `ex_user_id()`, `ex_logout()`. The
+> session-based login used by the web controllers is the fully wired path.
+
 exAuth provides four authenticators — Session, AccessTokens, HmacSha256, and JWT — and a Chain mechanism that tries them sequentially. The `Authentication` class acts as a factory and multiplexer.
 
 ## Getting an Instance

@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace exAuth\Entities;
 
 use CodeIgniter\Entity\Entity;
-use DateTime;
+use exAuth\Traits\Activatable;
+use exAuth\Traits\Authorizable;
+use exAuth\Traits\Bannable;
 
 class User extends Entity
 {
+    use Activatable;
+    use Authorizable;
+    use Bannable;
+
     protected array $attributes = [
         'id'             => null,
         'email'          => null,

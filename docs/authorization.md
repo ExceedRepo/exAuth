@@ -1,5 +1,11 @@
 # Authorization
 
+> **Note:** Groups and permissions are stored in the database
+> (`auth_groups_users` stores the group name per user; `auth_permissions_users`
+> stores direct per-user permissions). Route protection works today via the
+> `group:` and `permission:` filters (see the [Setup Guide](SETUP.md)). The
+> `service('authorization')` API described below is part of the broader design.
+
 exAuth includes a Flat RBAC system with database-backed groups and permissions. Roles and permissions are managed at runtime, not hardcoded in config files.
 
 ## Authorization Service

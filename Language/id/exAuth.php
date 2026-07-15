@@ -11,6 +11,7 @@ return [
     'registerSuccess'   => 'Berhasil mendaftar.',
     'registerDisabled'  => 'Pendaftaran tidak tersedia.',
     'errorInvalidToken' => 'Token yang diberikan tidak valid.',
+    'errorTokenInvalid' => 'Token yang diberikan tidak valid.',
     'errorTokenExpired' => 'Token yang diberikan sudah kedaluwarsa.',
     'errorAccessDenied' => 'Akses ditolak.',
     'permDenied'        => 'Anda tidak memiliki izin yang diperlukan.',

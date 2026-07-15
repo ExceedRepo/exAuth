@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace exAuth\Commands;
 
-use exAuth\Authentication\Authenticators\Session;
 use exAuth\Commands\Exceptions\BadInputException;
 use exAuth\Commands\Exceptions\CancelException;
 use exAuth\Config\AuthGroups;
 use exAuth\Entities\User as UserEntity;
 use exAuth\Exceptions\UserNotFoundException;
 use exAuth\Models\UserModel;
-use Config\Services;
 
 class User extends BaseCommand
 {
@@ -73,12 +71,8 @@ class User extends BaseCommand
         '-g'          => 'Group name',
     ];
 
-    private array $tables = [];
-
     public function run(array $params): int
     {
-        $this->setTables();
-
         $action = $params[0] ?? null;
 
         if ($action === null || ! in_array($action, $this->validActions, true)) {
@@ -115,14 +109,6 @@ class User extends BaseCommand
         return EXIT_SUCCESS;
     }
 
-    private function setTables(): void
-    {
-        $db              = db_connect();
-        $this->tables    = $db->getPrefix() !== ''
-            ? ['users' => $db->getPrefix() . 'users', 'identities' => $db->getPrefix() . 'auth_identities']
-            : ['users' => 'users', 'identities' => 'auth_identities'];
-    }
-
     private function create(?string $username = null, ?string $email = null, ?string $group = null): void
     {
         $data = [];
@@ -133,7 +119,7 @@ class User extends BaseCommand
         $data['username'] = $username;
 
         if ($email === null) {
-            $email = $this->prompt('Email', null, 'required|valid_email|is_unique[auth_identities.secret]');
+            $email = $this->prompt('Email', null, 'required|valid_email|is_unique[users.email]');
         }
         $data['email'] = $email;
 
@@ -143,7 +129,8 @@ class User extends BaseCommand
         if ($password !== $passwordConfirm) {
             throw new BadInputException("The passwords don't match");
         }
-        $data['password'] = $password;
+        $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+        $data['active']   = 1;
 
         $userModel = model(UserModel::class);
         $user      = new UserEntity($data);
@@ -157,9 +144,10 @@ class User extends BaseCommand
         $user   = $userModel->findUserById($userId);
 
         if ($group !== null) {
-            if (method_exists($user, 'addGroup')) {
-                $user->addGroup($group);
-            }
+            db_connect()->table('auth_groups_users')->insert([
+                'user_id'  => $userId,
+                'group_id' => $group,
+            ]);
             $this->write('User "' . $username . '" created and added to group "' . $group . '".', 'green');
         } else {
             $this->write('User "' . $username . '" created.', 'green');
@@ -253,7 +241,7 @@ class User extends BaseCommand
             }
 
             $userModel     = model(UserModel::class);
-            $user->password = $password;
+            $user->password = password_hash($password, PASSWORD_DEFAULT);
             $userModel->save($user);
 
             $this->write('Password for "' . $user->username . '" set', 'green');
@@ -264,27 +252,13 @@ class User extends BaseCommand
 
     private function list(?string $username = null, ?string $email = null): void
     {
-        $userModel = model(UserModel::class);
-        $userModel
-            ->select($this->tables['users'] . '.id as id, username, secret as email')
-            ->join(
-                $this->tables['identities'],
-                $this->tables['users'] . '.id = ' . $this->tables['identities'] . '.user_id',
-                'LEFT',
-            )
-            ->groupStart()
-            ->where($this->tables['identities'] . '.type', Session::ID_TYPE_EMAIL_PASSWORD)
-            ->orGroupStart()
-            ->where($this->tables['identities'] . '.type', null)
-            ->groupEnd()
-            ->groupEnd()
-            ->asArray();
+        $userModel = model(UserModel::class)->asArray();
 
         if ($username !== null) {
             $userModel->like('username', $username);
         }
         if ($email !== null) {
-            $userModel->like('secret', $email);
+            $userModel->like('email', $email);
         }
 
         $this->write("Id\tUser");
@@ -312,7 +286,19 @@ class User extends BaseCommand
         );
 
         if ($confirm === 'y') {
-            $user->addGroup($group);
+            $db = db_connect();
+            $exists = $db->table('auth_groups_users')
+                ->where('user_id', $user->id)
+                ->where('group_id', $group)
+                ->countAllResults() > 0;
+
+            if (! $exists) {
+                $db->table('auth_groups_users')->insert([
+                    'user_id'  => $user->id,
+                    'group_id' => $group,
+                ]);
+            }
+
             $this->write('User "' . $user->username . '" added to group "' . $group . '"', 'green');
         } else {
             $this->write(
@@ -340,7 +326,11 @@ class User extends BaseCommand
         );
 
         if ($confirm === 'y') {
-            $user->removeGroup($group);
+            db_connect()->table('auth_groups_users')
+                ->where('user_id', $user->id)
+                ->where('group_id', $group)
+                ->delete();
+
             $this->write('User "' . $user->username . '" removed from group "' . $group . '"', 'green');
         } else {
             $this->write('Removal of the user "' . $user->username . '" from the group "' . $group . '" cancelled', 'yellow');
@@ -360,26 +350,12 @@ class User extends BaseCommand
         }
 
         $userModel = model(UserModel::class);
-        $userModel
-            ->select($this->tables['users'] . '.id as id, username, secret')
-            ->join(
-                $this->tables['identities'],
-                $this->tables['users'] . '.id = ' . $this->tables['identities'] . '.user_id',
-                'LEFT',
-            )
-            ->groupStart()
-            ->where($this->tables['identities'] . '.type', Session::ID_TYPE_EMAIL_PASSWORD)
-            ->orGroupStart()
-            ->where($this->tables['identities'] . '.type', null)
-            ->groupEnd()
-            ->groupEnd()
-            ->asArray();
 
         $user = null;
         if ($username !== null) {
-            $user = $userModel->where('username', $username)->first();
+            $user = $userModel->asArray()->where('username', $username)->first();
         } elseif ($email !== null) {
-            $user = $userModel->where('secret', $email)->first();
+            $user = $userModel->asArray()->where('email', $email)->first();
         }
 
         $this->checkUserExists($user);

@@ -10,8 +10,7 @@ class SessionAuth implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Check if user is authenticated via session
-        if (! session()->has('user_id')) {
+        if (session()->get('auth_logged_in') !== true) {
             return redirect()->to('/login');
         }
 

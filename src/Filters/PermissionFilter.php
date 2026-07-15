@@ -10,30 +10,33 @@ class PermissionFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        $permissions = session()->get('permissions') ?? [];
+        $userId = session()->get('auth_user_id');
 
-        if (empty($permissions)) {
+        if ($userId === null || session()->get('auth_logged_in') !== true) {
             return redirect()->to('/login');
         }
 
-        if ($arguments !== null) {
-            $hasPermission = false;
+        if ($arguments === null || $arguments === []) {
+            return null;
+        }
 
-            foreach ($arguments as $required) {
-                if (in_array($required, $permissions, true)) {
-                    $hasPermission = true;
-                    break;
-                }
-            }
+        $rows = db_connect()->table('auth_permissions_users')
+            ->select('permission')
+            ->where('user_id', $userId)
+            ->get()
+            ->getResultArray();
 
-            if (! $hasPermission) {
-                return service('response')->setStatusCode(403)->setJSON([
-                    'error' => 'Insufficient permissions',
-                ]);
+        $userPermissions = array_column($rows, 'permission');
+
+        foreach ($arguments as $required) {
+            if (in_array($required, $userPermissions, true)) {
+                return null;
             }
         }
 
-        return null;
+        return service('response')->setStatusCode(403)->setJSON([
+            'error' => 'Insufficient permissions',
+        ]);
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null): void
