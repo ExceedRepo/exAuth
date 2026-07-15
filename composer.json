@@ -18,10 +18,10 @@
             "role": "Developer"
         }
     ],
-    "homepage": "https://github.com/exceed/exauth",
+    "homepage": "https://github.com/ExceedRepo/exAuth",
     "support": {
-        "source": "https://github.com/exceed/exauth",
-        "docs": "https://github.com/exceed/exauth"
+        "source": "https://github.com/ExceedRepo/exAuth",
+        "docs": "https://github.com/ExceedRepo/exAuth"
     },
     "require": {
         "php": "^8.2",
