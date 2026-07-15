@@ -97,6 +97,48 @@ This command automatically:
 > The final “Run migrate now?” prompt **can be skipped** (answer `n`) because we run
 > migrations ourselves in the next step.
 
+### 5b. Manual setup (only if the command fails)
+
+If `exauth:setup` cannot run for some reason, do these 4 things by hand:
+
+1. **Publish config** — copy and edit the namespace so they extend the package config:
+
+   ```bash
+   cp vendor/exceed/exauth/src/Config/exAuth.php app/Config/
+   cp vendor/exceed/exauth/src/Config/AuthGroups.php app/Config/
+   ```
+
+   `app/Config/exAuth.php`:
+   ```php
+   <?php
+   namespace Config;
+   use exAuth\Config\exAuth as BaseExAuth;
+   class exAuth extends BaseExAuth {}
+   ```
+
+   `app/Config/AuthGroups.php`:
+   ```php
+   <?php
+   namespace Config;
+   use exAuth\Config\AuthGroups as BaseAuthGroups;
+   class AuthGroups extends BaseAuthGroups {}
+   ```
+
+2. **Load the helper** in `app/Config/Autoload.php`:
+   ```php
+   public $helpers = ['exAuth', 'setting'];
+   ```
+
+3. **Add the routes** in `app/Config/Routes.php`:
+   ```php
+   service('auth')->routes($routes);
+   ```
+
+4. **Fix CSRF** in `app/Config/Security.php`:
+   ```php
+   public $csrfProtection = 'session';
+   ```
+
 ---
 
 ## 6. Run the migrations

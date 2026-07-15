@@ -60,8 +60,8 @@ $psr4 = [
 
 ## Configuration
 
-> **New to exAuth?** Follow the step-by-step [Setup Guide](docs/SETUP.md) — it
-> takes you from zero to a working login/register/logout flow.
+> **New to exAuth?** Follow the step-by-step [Beginner Setup Guide](docs/EXAUTH_BEGINNER_SETUP.md) — it
+> takes you from zero to a working login/register/logout flow (and RBAC).
 
 The fastest way to configure everything is the setup command:
 
@@ -71,7 +71,7 @@ php spark exauth:setup
 
 This publishes config, registers the `exAuth` helper, adds the auth routes,
 adjusts CSRF settings, and runs migrations. To do it manually, see the
-[Setup Guide](docs/SETUP.md#4-manual-setup).
+[Beginner Setup Guide](docs/EXAUTH_BEGINNER_SETUP.md#5b-manual-setup-only-if-the-command-fails).
 
 ## Overview
 

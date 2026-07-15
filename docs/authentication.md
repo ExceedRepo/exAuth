@@ -2,7 +2,7 @@
 
 > **Note:** This document describes the broader authenticator design. For the
 > practical, supported day-to-day flow (login, register, logout, current user),
-> use the helper functions shown in the [Setup Guide](SETUP.md) —
+> use the helper functions shown in the [Beginner Setup Guide](EXAUTH_BEGINNER_SETUP.md) —
 > `ex_logged_in()`, `ex_current_user()`, `ex_user_id()`, `ex_logout()`. The
 > session-based login used by the web controllers is the fully wired path.
 
