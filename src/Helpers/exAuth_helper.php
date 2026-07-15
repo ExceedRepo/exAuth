@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
+use exAuth\Auth;
 use exAuth\Authentication\Authentication;
 use exAuth\Authentication\Authenticators\Session;
 use exAuth\Entities\User;
 
 if (! function_exists('ex_auth')) {
-    function ex_auth(): Authentication
+    function ex_auth(): Auth
     {
         return service('auth');
     }

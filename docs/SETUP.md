@@ -454,7 +454,7 @@ libraries (yes, we learned this the hard way).
 
 | Function | Returns | Description |
 |----------|---------|-------------|
-| `ex_auth()` | `exAuth\Authentication\Authentication` | The auth service instance |
+| `ex_auth()` | `exAuth\Auth` | The auth facade (has `routes()` method) |
 | `ex_logged_in()` | `bool` | Check if any user is logged in |
 | `ex_current_user()` | `exAuth\Entities\User\|null` | Get the logged-in user entity |
 | `ex_user_id()` | `int\|null` | Get the current user's ID |
