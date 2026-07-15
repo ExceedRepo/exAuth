@@ -438,8 +438,13 @@ to `/login` because the `session` filter is doing its job.
 
 ### Step 6: Login Again
 
-Go to `http://your-app.test/login`, enter your email and password, and you
-should be back in the dashboard.
+Go to `http://your-app.test/login`, enter your **email or username** (the login
+field accepts either by default) and your password, and you should be back in
+the dashboard.
+
+> **Tip:** You can restrict login to email-only or username-only in
+> `app/Config/exAuth.php` via `$useEmailForLogin` / `$useUsernameForLogin`.
+> See the [Authentication docs](authentication.md#login-field-configuration).
 
 ### Step 7: Try the Helper Functions in `spark tinker` (or any view)
 

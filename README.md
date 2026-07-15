@@ -91,6 +91,25 @@ Default views live in `src/Views` and are based on Bootstrap 5. To customize
 them, copy the files into your app's `Views` directory and adjust the
 `view(...)` calls, or override the paths in `Config/exAuth.php`.
 
+### Login field (email / username / both)
+
+Like Shield and Myth-Auth, exAuth lets you choose which field users log in with.
+Configure it in **Config/exAuth.php**:
+
+```php
+public array $validFields         = ['email', 'username'];
+public bool  $useEmailForLogin    = true;
+public bool  $useUsernameForLogin = true;
+```
+
+- Both `true` (default): the login form accepts **either** an email or a
+  username in a single field. The controller auto-detects which one was entered.
+- Only email: set `$useUsernameForLogin = false`.
+- Only username: set `$useEmailForLogin = false`.
+
+The login view submits a single `login` input; `LoginController::loginPost()`
+reads the config and resolves the user accordingly.
+
 ## Services
 
 **auth**

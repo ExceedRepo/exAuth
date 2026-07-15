@@ -38,6 +38,29 @@ getError(): ?string
 setUser(object $user): void
 ```
 
+## Login Field Configuration
+
+exAuth (like Shield and Myth-Auth) lets you decide whether users log in with
+their email, their username, or either one. This is controlled in
+`Config/exAuth.php`:
+
+```php
+public array $validFields         = ['email', 'username'];
+public bool  $useEmailForLogin    = true;
+public bool  $useUsernameForLogin = true;
+```
+
+`LoginController::loginPost()` reads these settings:
+
+- If **both** are enabled, the submitted value is inspected with
+  `FILTER_VALIDATE_EMAIL`; if it looks like an email the user is looked up by
+  email, otherwise by username.
+- If only one is enabled, only that field is used.
+
+The default login view posts a single `login` field that accepts either value.
+If you build a custom form, post the value as `login` (or `email` / `username`
+directly — both are honored based on the config).
+
 ## Session Authenticator
 
 The primary authenticator for web-based logins.
