@@ -128,20 +128,32 @@ $auth->authenticate([
 
 ## JWT Authenticator
 
-For stateless authentication using JSON Web Tokens.
+For stateless authentication using JSON Web Tokens. This path is **fully wired
+and tested** — see the dedicated **[Beginner JWT Setup guide](EXAUTH_BEGINNER_JWT_SETUP.md)**
+for the complete, working flow (issue token, protect routes, refresh).
+
+Quick summary:
 
 ```php
-$auth = service('authentication', 'jwt');
-$token = $request->getHeaderLine('Authorization'); // Bearer <token>
+// Issue a token (usually done for you by POST /api/auth/token)
+$token = service('jwt')->generateToken($userId, ['email' => $email]);
 
-$auth->authenticate(['token' => $token]);
+// Verify a raw token
+$jwt = service('jwt');
+if ($jwt->verify($token)) {
+    $userId = $jwt->getUserId();
+}
 ```
 
-JWT token generation:
+Register the API endpoints (`/api/auth/token`, `/api/auth/refresh`,
+`/api/auth/me`) in `app/Config/Routes.php`:
 
 ```php
-$token = $auth->generateToken($user);
+service('auth')->jwtRoutes($routes);
 ```
+
+Protect routes with the `jwt` filter and read the current user with
+`ex_jwt_id()` / `ex_jwt_user()`.
 
 ## Chain Authentication
 

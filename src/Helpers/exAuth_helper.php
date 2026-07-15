@@ -60,3 +60,30 @@ if (! function_exists('ex_current_user')) {
         return $userModel->find($userId);
     }
 }
+
+if (! function_exists('ex_jwt_id')) {
+    /**
+     * Returns the user id from the currently verified JWT (set by the `jwt` filter),
+     * or null if there is none.
+     */
+    function ex_jwt_id(): ?int
+    {
+        return service('jwt')->getUserId();
+    }
+}
+
+if (! function_exists('ex_jwt_user')) {
+    /**
+     * Returns the User entity for the currently verified JWT, or null.
+     */
+    function ex_jwt_user(): ?User
+    {
+        $userId = ex_jwt_id();
+
+        if ($userId === null) {
+            return null;
+        }
+
+        return model(\exAuth\Models\UserModel::class)->find($userId);
+    }
+}

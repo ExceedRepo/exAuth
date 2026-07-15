@@ -33,6 +33,8 @@ composer test        # or: vendor/bin/phpunit
 | `tests/Models/UserModelTest.php` | `getUserByEmail()` / `getUserByUsername()` return arrays; stored password verifies. |
 | `tests/Entities/UserAuthorizableTest.php` | `inGroup()`, `can()` incl. wildcard permissions from groups and direct per-user permissions. |
 | `tests/Authentication/SessionAuthenticatorTest.php` | `Session::login()` + helpers (`ex_logged_in()`, `ex_user_id()`, `ex_current_user()`), and `ex_logout()` clears state. |
+| `tests/Authentication/JWTAuthenticatorTest.php` | JWT generate/verify/refresh, tampered + expired + wrong-secret rejection, short-secret guard. |
+| `tests/Controllers/JWTFlowTest.php` | End-to-end token API: issue token (email/username), reject wrong password, protected `/me` with/without/invalid token, refresh. |
 | `tests/Config/LoginFieldConfigTest.php` | Login field settings (`validFields`, `useEmailForLogin`, `useUsernameForLogin`) exist and default to both. |
 
 ## Writing your own tests

@@ -44,4 +44,27 @@ class Auth
             $routes->get('verify-magic-link', 'MagicLinkController::verifyLink', ['as' => 'verify-magic-link']);
         });
     }
+
+    /**
+     * Registers the JWT API routes (opt-in).
+     *
+     * Usage in app/Config/Routes.php:
+     *   service('auth')->jwtRoutes($routes);
+     *
+     * Produces:
+     *   POST   {prefix}/token    -> issue a JWT from credentials
+     *   POST   {prefix}/refresh  -> exchange a valid token for a fresh one
+     *   GET    {prefix}/me       -> current user (protected by the `jwt` filter)
+     */
+    public function jwtRoutes(RouteCollection &$routes, array $config = []): void
+    {
+        $namespace = $config['namespace'] ?? 'exAuth\Controllers';
+        $prefix    = trim($config['prefix'] ?? 'api/auth', '/');
+
+        $routes->group($prefix, ['namespace' => $namespace], static function (RouteCollection $routes): void {
+            $routes->post('token', 'JWTController::token', ['as' => 'jwt-token']);
+            $routes->post('refresh', 'JWTController::refresh', ['as' => 'jwt-refresh']);
+            $routes->get('me', 'JWTController::me', ['as' => 'jwt-me', 'filter' => 'jwt']);
+        });
+    }
 }

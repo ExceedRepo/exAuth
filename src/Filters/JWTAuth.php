@@ -10,11 +10,11 @@ class JWTAuth implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        $authHeader = $request->getHeader('Authorization');
+        $jwt = service('jwt');
 
-        if ($authHeader === null || ! str_starts_with($authHeader->getValue(), 'Bearer ')) {
+        if (! $jwt->authenticate($request)) {
             return service('response')->setStatusCode(401)->setJSON([
-                'error' => 'Missing or invalid JWT token',
+                'error' => $jwt->getErrorMessage() !== '' ? $jwt->getErrorMessage() : 'Unauthorized',
             ]);
         }
 
