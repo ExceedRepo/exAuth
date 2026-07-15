@@ -26,7 +26,7 @@ trait HasAccessTokens
         return $token;
     }
 
-    public function regenerateAccessToken(int $id): \exAuth\Entities\AccessToken|null
+    public function revokeAccessToken(int $id): bool
     {
         $identityModel = model(UserIdentityModel::class);
 
@@ -36,11 +36,14 @@ trait HasAccessTokens
             ->first();
 
         if ($existing === null) {
-            return null;
+            return false;
         }
 
-        $identityModel->delete($id);
+        return (bool) $identityModel->delete($id);
+    }
 
-        return $identityModel->generateAccessToken($this, $existing->name ?? '', $existing->extra ?? ['*']);
+    public function revokeAllAccessTokens(): void
+    {
+        model(UserIdentityModel::class)->deleteIdentitiesByType((int) $this->id, 'access_token');
     }
 }

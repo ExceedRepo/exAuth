@@ -62,7 +62,8 @@ $psr4 = [
 
 > **New to exAuth?** Follow the step-by-step [Beginner Setup Guide](docs/EXAUTH_BEGINNER_SETUP.md) — it
 > takes you from zero to a working login/register/logout flow (and RBAC).
-> Building an API? See the [Beginner JWT Setup guide](docs/EXAUTH_BEGINNER_JWT_SETUP.md).
+> Building an API? See the [Beginner JWT Setup guide](docs/EXAUTH_BEGINNER_JWT_SETUP.md)
+> or the [Access Tokens & HMAC guide](docs/EXAUTH_BEGINNER_TOKENS_HMAC_SETUP.md).
 
 The fastest way to configure everything is the setup command:
 

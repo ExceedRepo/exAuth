@@ -8,12 +8,16 @@ use CodeIgniter\Entity\Entity;
 use exAuth\Traits\Activatable;
 use exAuth\Traits\Authorizable;
 use exAuth\Traits\Bannable;
+use exAuth\Traits\HasAccessTokens;
+use exAuth\Traits\HasHmacTokens;
 
 class User extends Entity
 {
     use Activatable;
     use Authorizable;
     use Bannable;
+    use HasAccessTokens;
+    use HasHmacTokens;
 
     protected $attributes = [
         'id'             => null,

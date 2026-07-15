@@ -10,11 +10,11 @@ class HmacAuth implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        $signature = $request->getHeader('X-Signature');
+        $hmac = service('hmac');
 
-        if ($signature === null) {
+        if (! $hmac->authenticate($request)) {
             return service('response')->setStatusCode(401)->setJSON([
-                'error' => 'Missing HMAC signature',
+                'error' => $hmac->getErrorMessage() !== '' ? $hmac->getErrorMessage() : 'Unauthorized',
             ]);
         }
 

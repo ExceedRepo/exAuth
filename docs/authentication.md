@@ -95,35 +95,41 @@ $auth->logout();
 
 ## AccessTokens Authenticator
 
-For API clients using bearer tokens.
+Personal access tokens (API keys). **Fully wired and tested** — see the
+**[Access Tokens & HMAC guide](EXAUTH_BEGINNER_TOKENS_HMAC_SETUP.md)**.
 
 ```php
-$auth = service('authentication', 'tokens');
-$token  = $request->getHeaderLine('Authorization'); // Bearer <token>
+// Create a token (raw value shown once; DB stores only its hash)
+$token = $user->createAccessToken('My App', ['posts.read']);
+echo $token->token;
 
-$auth->authenticate(['token' => $token]);
-```
+// Protect a route
+$routes->get('api/posts', 'Api\Posts::index', ['filter' => 'tokens']);
+$routes->get('api/posts', 'Api\Posts::create', ['filter' => 'tokens:posts.write']);
 
-Tokens are generated via the user entity:
-
-```php
-$token = $user->generateAccessToken('My App');
+// In the controller
+$userId = ex_token_id();
+$user   = ex_token_user();
 ```
 
 ## HmacSha256 Authenticator
 
-For server-to-server API communication using HMAC signatures.
+Signed server-to-server requests — the secret never travels on the wire.
+**Fully wired and tested** — see the
+**[Access Tokens & HMAC guide](EXAUTH_BEGINNER_TOKENS_HMAC_SETUP.md)**.
 
 ```php
-$auth = service('authentication', 'hmac');
-$signature = $request->getHeaderLine('X-Signature');
-$timestamp = $request->getHeaderLine('X-Timestamp');
+// Create a key pair (secret shown once)
+$cred = $user->createHmacKey();
+echo $cred->token;   // public key
+echo $cred->secret;  // shared secret
 
-$auth->authenticate([
-    'signature' => $signature,
-    'timestamp' => $timestamp,
-    'content'   => file_get_contents('php://input'),
-]);
+// Client sends: Authorization: HMAC-SHA256 <key>:<hmac_sha256(body, secret)>
+$routes->post('api/ingest', 'Api\Ingest::store', ['filter' => 'hmac']);
+
+// In the controller
+$userId = ex_hmac_id();
+$user   = ex_hmac_user();
 ```
 
 ## JWT Authenticator

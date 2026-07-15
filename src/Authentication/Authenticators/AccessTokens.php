@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace exAuth\Authentication\Authenticators;
 
+use CodeIgniter\I18n\Time;
 use exAuth\Authentication\AuthenticatorInterface;
 use exAuth\Models\UserIdentityModel;
 
@@ -12,6 +13,8 @@ class AccessTokens implements AuthenticatorInterface
     private string $error = '';
 
     private ?int $userId = null;
+
+    private array $scopes = [];
 
     public function authenticate(\CodeIgniter\HTTP\Request $request): bool
     {
@@ -34,14 +37,8 @@ class AccessTokens implements AuthenticatorInterface
             return false;
         }
 
-        $hashed = hash('sha256', $rawToken);
-
         $identityModel = model(UserIdentityModel::class);
-
-        $row = $identityModel->asObject()
-            ->where('type', 'access_token')
-            ->where('secret', $hashed)
-            ->first();
+        $row           = $identityModel->findByAccessToken($rawToken);
 
         if ($row === null) {
             $this->error = 'Invalid access token';
@@ -49,9 +46,35 @@ class AccessTokens implements AuthenticatorInterface
             return false;
         }
 
+        if (! empty($row->expires_at) && Time::parse($row->expires_at)->isBefore(Time::now())) {
+            $this->error = 'Access token has expired';
+
+            return false;
+        }
+
         $this->userId = (int) $row->user_id;
+        $this->scopes = $this->decodeScopes($row->extras ?? null);
+
+        $identityModel->touchLastUsed((int) $row->id);
 
         return true;
+    }
+
+    /**
+     * Whether the current token grants a given scope (supports the '*' wildcard).
+     */
+    public function tokenCan(string $scope): bool
+    {
+        if (in_array('*', $this->scopes, true)) {
+            return true;
+        }
+
+        return in_array($scope, $this->scopes, true);
+    }
+
+    public function getScopes(): array
+    {
+        return $this->scopes;
     }
 
     public function getUserId(): int|null
@@ -67,7 +90,8 @@ class AccessTokens implements AuthenticatorInterface
     public function logout(): void
     {
         $this->userId = null;
-        $this->error = '';
+        $this->scopes = [];
+        $this->error  = '';
     }
 
     public function getError(): string|null
@@ -78,6 +102,17 @@ class AccessTokens implements AuthenticatorInterface
     public function getErrorMessage(): string
     {
         return $this->error;
+    }
+
+    private function decodeScopes(?string $extras): array
+    {
+        if ($extras === null || $extras === '') {
+            return ['*'];
+        }
+
+        $decoded = json_decode($extras, true);
+
+        return is_array($decoded) ? $decoded : ['*'];
     }
 
     private function extractBearerToken(\CodeIgniter\HTTP\Request $request): string|null

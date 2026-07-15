@@ -10,11 +10,24 @@ class TokenAuth implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        $token = $request->getHeader('Authorization');
+        $tokens = service('tokens');
 
-        if ($token === null) {
+        if (! $tokens->authenticate($request)) {
             return service('response')->setStatusCode(401)->setJSON([
-                'error' => 'Missing authorization token',
+                'error' => $tokens->getErrorMessage() !== '' ? $tokens->getErrorMessage() : 'Unauthorized',
+            ]);
+        }
+
+        // Optional scope enforcement: ['filter' => 'tokens:posts.read']
+        if ($arguments !== null && $arguments !== []) {
+            foreach ($arguments as $scope) {
+                if ($tokens->tokenCan($scope)) {
+                    return null;
+                }
+            }
+
+            return service('response')->setStatusCode(403)->setJSON([
+                'error' => 'Token is missing the required scope',
             ]);
         }
 

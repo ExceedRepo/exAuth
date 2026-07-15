@@ -46,9 +46,9 @@ app.baseURL = 'https://mantan-terindah.com'   # replace with your app's domain/U
 
 # Database (MySQL example)
 database.default.hostname = localhost
-database.default.database = your_db
-database.default.username = your-db-user
-database.default.password = 'REDACTED_DB_PASSWORD'
+database.default.database = db_remember
+database.default.username = myex
+database.default.password = 'myB34ut1ful3x'
 database.default.DBDriver = MySQLi
 database.default.DBPrefix =
 database.default.port = 3306

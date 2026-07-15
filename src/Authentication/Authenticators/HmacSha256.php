@@ -23,11 +23,10 @@ class HmacSha256 implements AuthenticatorInterface
             return false;
         }
 
-        $token = trim(substr($header, 11));
+        $token = trim(substr($header, 12));
+        $parts = explode(':', $token, 2);
 
-        $parts = explode(':', $token);
-
-        if (count($parts) !== 2) {
+        if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
             $this->error = 'Invalid HMAC token format';
 
             return false;
@@ -43,11 +42,7 @@ class HmacSha256 implements AuthenticatorInterface
     public function verify(string $key, string $signature, string $body): bool
     {
         $identityModel = model(UserIdentityModel::class);
-
-        $row = $identityModel->asObject()
-            ->where('type', 'hmac_sha256')
-            ->where('secret', $key)
-            ->first();
+        $row           = $identityModel->findByHmacKey($key);
 
         if ($row === null) {
             $this->error = 'Invalid HMAC key';
@@ -65,7 +60,17 @@ class HmacSha256 implements AuthenticatorInterface
 
         $this->userId = (int) $row->user_id;
 
+        $identityModel->touchLastUsed((int) $row->id);
+
         return true;
+    }
+
+    /**
+     * Convenience: build the signature a client must send for a given body.
+     */
+    public static function sign(string $body, string $secret): string
+    {
+        return hash_hmac('sha256', $body, $secret);
     }
 
     public function getUserId(): int|null
@@ -81,7 +86,7 @@ class HmacSha256 implements AuthenticatorInterface
     public function logout(): void
     {
         $this->userId = null;
-        $this->error = '';
+        $this->error  = '';
     }
 
     public function getError(): string|null

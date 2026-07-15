@@ -87,3 +87,49 @@ if (! function_exists('ex_jwt_user')) {
         return model(\exAuth\Models\UserModel::class)->find($userId);
     }
 }
+
+if (! function_exists('ex_token_id')) {
+    /**
+     * User id from the currently verified access token (set by the `tokens` filter).
+     */
+    function ex_token_id(): ?int
+    {
+        return service('tokens')->getUserId();
+    }
+}
+
+if (! function_exists('ex_token_user')) {
+    function ex_token_user(): ?User
+    {
+        $userId = ex_token_id();
+
+        if ($userId === null) {
+            return null;
+        }
+
+        return model(\exAuth\Models\UserModel::class)->find($userId);
+    }
+}
+
+if (! function_exists('ex_hmac_id')) {
+    /**
+     * User id from the currently verified HMAC request (set by the `hmac` filter).
+     */
+    function ex_hmac_id(): ?int
+    {
+        return service('hmac')->getUserId();
+    }
+}
+
+if (! function_exists('ex_hmac_user')) {
+    function ex_hmac_user(): ?User
+    {
+        $userId = ex_hmac_id();
+
+        if ($userId === null) {
+            return null;
+        }
+
+        return model(\exAuth\Models\UserModel::class)->find($userId);
+    }
+}
