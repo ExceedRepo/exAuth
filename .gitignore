@@ -1,0 +1,7 @@
+vendor/
+build/
+.phpunit.cache
+.php-cs-fixer.cache
+*.swp
+*.swo
+.DS_Store
