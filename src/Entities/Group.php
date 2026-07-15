@@ -10,7 +10,7 @@ class Group extends Entity
 {
     protected array $permissions = [];
 
-    protected array $casts = [
+    protected $casts = [
         'id'          => 'int',
         'name'        => 'string',
         'description' => 'string',

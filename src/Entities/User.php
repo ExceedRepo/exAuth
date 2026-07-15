@@ -15,7 +15,7 @@ class User extends Entity
     use Authorizable;
     use Bannable;
 
-    protected array $attributes = [
+    protected $attributes = [
         'id'             => null,
         'email'          => null,
         'username'       => null,
@@ -31,7 +31,7 @@ class User extends Entity
         'deleted_at'     => null,
     ];
 
-    protected array $casts = [
+    protected $casts = [
         'id'             => '?integer',
         'email'          => '?string',
         'username'       => '?string',
@@ -47,7 +47,7 @@ class User extends Entity
         'deleted_at'     => 'datetime',
     ];
 
-    protected array $dates = [
+    protected $dates = [
         'created_at',
         'updated_at',
         'deleted_at',

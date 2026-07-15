@@ -8,7 +8,7 @@ use CodeIgniter\Entity\Entity;
 
 class Login extends Entity
 {
-    protected array $casts = [
+    protected $casts = [
         'id'         => 'int',
         'user_id'    => 'int',
         'ip_address' => 'string',
@@ -18,7 +18,7 @@ class Login extends Entity
         'success'    => 'int-bool',
     ];
 
-    protected array $dates = [
+    protected $dates = [
         'date',
     ];
 }

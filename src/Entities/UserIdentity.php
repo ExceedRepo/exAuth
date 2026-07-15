@@ -8,7 +8,7 @@ use CodeIgniter\Entity\Entity;
 
 class UserIdentity extends Entity
 {
-    protected array $casts = [
+    protected $casts = [
         'id'           => '?integer',
         'user_id'      => '?integer',
         'type'         => 'string',
@@ -24,7 +24,7 @@ class UserIdentity extends Entity
         'deletedAt'    => 'datetime',
     ];
 
-    protected array $dates = [
+    protected $dates = [
         'last_used_at',
         'expires_at',
         'createdAt',

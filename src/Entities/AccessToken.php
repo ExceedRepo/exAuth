@@ -8,7 +8,7 @@ use CodeIgniter\Entity\Entity;
 
 class AccessToken extends Entity
 {
-    protected array $casts = [
+    protected $casts = [
         'id'           => '?integer',
         'token'        => 'string',
         'name'         => 'string',
@@ -21,7 +21,7 @@ class AccessToken extends Entity
         'updated_at'   => 'datetime',
     ];
 
-    protected array $dates = [
+    protected $dates = [
         'last_used_at',
         'expires_at',
         'created_at',
