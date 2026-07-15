@@ -1,5 +1,6 @@
 vendor/
 build/
+composer.lock
 AGENTS.md
 ANALISIS.md
 .phpunit.cache

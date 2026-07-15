@@ -1,60 +1,69 @@
 # Testing
 
-Testing support for exAuth is in an early stage. This document will be updated as the test suite matures.
+exAuth ships with an automated test suite built on PHPUnit and CodeIgniter 4's
+testing tools. Tests run against an **in-memory SQLite database**, so you don't
+need to configure MySQL to run them.
 
-## Running the existing tests
+## Running the tests
 
 ```bash
 # from the exAuth root directory
-composer test
-
-# or directly with phpunit
-vendor/bin/phpunit
+composer install     # first time only, installs PHPUnit etc.
+composer test        # or: vendor/bin/phpunit
 ```
+
+> Requires PHP 8.2+. If your default `php` is older, run with an explicit
+> binary, e.g. `php8.2 vendor/bin/phpunit`.
+
+## How it is wired
+
+- `phpunit.xml.dist` bootstraps the framework from
+  `vendor/codeigniter4/framework/system/Test/bootstrap.php` and sets the `tests`
+  database group to SQLite `:memory:`.
+- `tests/_support/TestCase.php` is the base class. It uses
+  `DatabaseTestTrait` and sets `$namespace = 'exAuth'` so **only exAuth's
+  migrations** run before each test. The schema is refreshed per test.
+- `auth.hashCost` is lowered in `phpunit.xml.dist` to keep password hashing fast.
 
 ## What is covered
 
-- **Authentication service**: instantiation and service registration
-- **Basic entity instantiation**: entity creation and default values
-
-## Fakers (coming soon)
-
-Fakers will be added to provide random data generation for test objects:
-
-- `UserFaker`
-- `GroupFaker`
-- `PermissionFaker`
-- `AccessTokenFaker`
+| Test | What it verifies |
+|------|------------------|
+| `tests/Database/MigrationsTest.php` | Core tables exist; `users` has a `password` column (not the legacy `password_hash`). |
+| `tests/Models/UserModelTest.php` | `getUserByEmail()` / `getUserByUsername()` return arrays; stored password verifies. |
+| `tests/Entities/UserAuthorizableTest.php` | `inGroup()`, `can()` incl. wildcard permissions from groups and direct per-user permissions. |
+| `tests/Authentication/SessionAuthenticatorTest.php` | `Session::login()` + helpers (`ex_logged_in()`, `ex_user_id()`, `ex_current_user()`), and `ex_logout()` clears state. |
+| `tests/Config/LoginFieldConfigTest.php` | Login field settings (`validFields`, `useEmailForLogin`, `useUsernameForLogin`) exist and default to both. |
 
 ## Writing your own tests
 
-The tests directory is structured as:
-
-```
-tests/
-    Authentication/
-    Authorization/
-    Controllers/
-    Entities/
-    Models/
-    Support/
-```
-
-Refer to the `tests/` directory for examples and to the [CodeIgniter 4 testing documentation](https://codeigniter.com/user_guide/testing/) for how to set up unit and feature tests.
-
-If you want to run tests with the framework integration:
+Extend the base test case so migrations run automatically:
 
 ```php
-use CodeIgniter\Test\CIUnitTestCase;
+<?php
 
-class UserTest extends CIUnitTestCase
+namespace Tests\Feature;
+
+use Tests\Support\TestCase;
+use exAuth\Models\UserModel;
+
+final class MyTest extends TestCase
 {
-    public function testUserCanBeCreated()
+    public function testSomething(): void
     {
-        $user = new \exAuth\Entities\User();
-        $this->assertInstanceOf(\exAuth\Entities\User::class, $user);
+        $model = model(UserModel::class);
+        $model->save([
+            'email'    => 'a@b.com',
+            'username' => 'ab',
+            'password' => password_hash('secret123', PASSWORD_DEFAULT),
+            'active'   => 1,
+        ]);
+
+        $this->assertIsArray($model->getUserByEmail('a@b.com'));
     }
 }
 ```
 
-For integration tests, use the `DatabaseTestTrait` to set up migrations automatically.
+The session is automatically mocked by CodeIgniter's `CIUnitTestCase`, so code
+that calls `session()` (like the Session authenticator and the `ex_*` helpers)
+works inside tests without extra setup.

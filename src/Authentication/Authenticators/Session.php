@@ -70,6 +70,8 @@ class Session implements AuthenticatorInterface
 
     public function logout(): void
     {
+        session()->remove('auth_user_id');
+        session()->remove('auth_logged_in');
         session()->destroy();
 
         $this->user = null;
