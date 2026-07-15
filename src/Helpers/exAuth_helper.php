@@ -5,37 +5,37 @@ declare(strict_types=1);
 use exAuth\Authentication\Authentication;
 use exAuth\Entities\User;
 
-if (! function_exists('auth')) {
-    function auth(): Authentication
+if (! function_exists('ex_auth')) {
+    function ex_auth(): Authentication
     {
         return service('auth');
     }
 }
 
-if (! function_exists('user_id')) {
-    function user_id(): ?int
+if (! function_exists('ex_user_id')) {
+    function ex_user_id(): ?int
     {
-        return auth()->getId();
+        return ex_auth()->getId();
     }
 }
 
-if (! function_exists('logged_in')) {
-    function logged_in(): bool
+if (! function_exists('ex_logged_in')) {
+    function ex_logged_in(): bool
     {
-        return auth()->isLoggedIn();
+        return ex_auth()->isLoggedIn();
     }
 }
 
-if (! function_exists('logout')) {
-    function logout(): void
+if (! function_exists('ex_logout')) {
+    function ex_logout(): void
     {
-        auth()->logout();
+        ex_auth()->logout();
     }
 }
 
-if (! function_exists('current_user')) {
-    function current_user(): ?User
+if (! function_exists('ex_current_user')) {
+    function ex_current_user(): ?User
     {
-        return auth()->getUser();
+        return ex_auth()->getUser();
     }
 }
