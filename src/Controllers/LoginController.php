@@ -44,7 +44,7 @@ class LoginController extends Controller
         $override = APPPATH . 'Views/exAuth/' . $name . '.php';
 
         if (file_exists($override)) {
-            return view('exAuth\\' . $name);
+            return view('exAuth/' . $name);
         }
 
         return view('exAuth\\Views\\' . $name);
