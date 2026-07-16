@@ -27,6 +27,10 @@ class RegisterController extends Controller
             return redirect()->to('/');
         }
 
+        if (! config('exAuth')->allowRegistration) {
+            return redirect()->to('login')->with('error', lang('exAuth.registerDisabled'));
+        }
+
         if ($this->request->getMethod() === 'POST') {
             return $this->registerPost();
         }

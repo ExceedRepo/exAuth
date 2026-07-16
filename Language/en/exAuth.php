@@ -7,6 +7,7 @@ return [
     'logInInvalid'      => 'Invalid username or password.',
     'logInLocked'       => 'Account is locked.',
     'logInNotActive'    => 'Account not active.',
+    'logInTooManyAttempts' => 'Too many login attempts. Please try again in %d seconds.',
     'logOutSuccess'     => 'Logged out successfully.',
     'registerSuccess'   => 'Registered successfully.',
     'registerDisabled'  => 'Registration is disabled.',

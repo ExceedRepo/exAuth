@@ -40,6 +40,14 @@ exAuth is not an official package. For production, the recommended library is [C
 - **Debug Toolbar** integration
 - **22-language support** structure (English + Indonesian built-in)
 
+### New in v1.5.0
+
+- **Cache RBAC** — groups & permissions cached 5 minutes (auto-invalidated on group/permission change).
+- **Auto-Installer Wizard** — `exauth:setup` interactive prompts for registration, authenticator, JWT/Tokens/HMAC, rate limiting.
+- **Rate Limiting** — brute-force throttling on login (config `enableRateLimit`, `maxLoginAttempts`, `loginAttemptHours`).
+- **Configurable registration** — `allowRegistration = false` now disables the register route and hides the "Register" link.
+- **Social login (Google)** — available as a separate package [`exceed/exauth-oauth`](https://github.com/ExceedRepo/exauth-oauth) (Google-only in phase 1).
+
 ## Installation
 
 ### Composer

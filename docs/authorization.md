@@ -8,6 +8,43 @@
 
 exAuth includes a Flat RBAC system with database-backed groups and permissions. Roles and permissions are managed at runtime, not hardcoded in config files.
 
+## Permission Caching (RBAC Cache)
+
+To avoid querying the database on every request, exAuth caches each user's
+groups and permissions for 5 minutes (300 seconds) using CodeIgniter's
+`cache` service. The cache is keyed per user:
+
+- `exauth_user_groups_{userId}`
+- `exauth_user_permissions_{userId}`
+
+The cache is read automatically by:
+
+- The `group` and `permission` route filters (`exAuth\Filters\GroupFilter`,
+  `exAuth\Filters\PermissionFilter`)
+- The `Authorizable` trait used by the `User` entity (`inGroup()`, `can()`, etc.)
+
+### Cache invalidation
+
+The cache is invalidated automatically whenever group membership changes via
+the CLI:
+
+```bash
+php spark exauth:user addgroup -n johndoe -g admin
+php spark exauth:user removegroup -n johndoe -g admin
+php spark exauth:user create -n johndoe -e john@example.com -g admin
+```
+
+If you change a user's groups or permissions directly via the database or your
+own code, clear the cache manually:
+
+```php
+cache()->delete("exauth_user_groups_{$userId}");
+cache()->delete("exauth_user_permissions_{$userId}");
+```
+
+To change the cache duration, edit the `save(..., 300)` calls in the filters
+and the `Authorizable` trait.
+
 ## Authorization Service
 
 ```php

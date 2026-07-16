@@ -14,6 +14,10 @@ class exAuth
     ];
     public bool $allowRegistration = true;
     public string $activeAuthenticator = 'session';
+    public bool $enableJWT = false;
+    public bool $enableTokens = false;
+    public bool $enableHmac = false;
+    public bool $enableRateLimit = true;
     public array $authenticators = [
         'session' => 'exAuth\\Authentication\\Authenticators\\Session',
         'tokens'  => 'exAuth\\Authentication\\Authenticators\\AccessTokens',

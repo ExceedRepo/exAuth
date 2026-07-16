@@ -198,4 +198,26 @@ $user = ex_current_user();
 $id   = ex_user_id();
 ```
 
+## Login Rate Limiting (Brute-Force Protection)
+
+exAuth throttles failed login attempts to defend against brute-force attacks.
+It uses CodeIgniter's `Throttler` and is enabled by default.
+
+Enable/disable and tune it in `Config/exAuth.php`:
+
+```php
+public bool $enableRateLimit = true;   // master switch
+public int  $maxLoginAttempts = 5;     // allowed failures
+public int  $loginAttemptHours = 1;    // counted over this window
+```
+
+When a client exceeds the limit, `LoginController::loginPost()` redirects back
+with the message `Too many login attempts. Please try again in N seconds.`
+(the `logInTooManyAttempts` language key, available in English and Indonesian).
+
+The throttle key is per-IP (`login_{ip}`), so it protects the login route
+without locking out legitimate users on a shared network.
+
+To disable it for development/testing, set `$enableRateLimit = false`.
+
 

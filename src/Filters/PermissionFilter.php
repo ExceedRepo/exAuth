@@ -20,13 +20,7 @@ class PermissionFilter implements FilterInterface
             return null;
         }
 
-        $rows = db_connect()->table('auth_permissions_users')
-            ->select('permission')
-            ->where('user_id', $userId)
-            ->get()
-            ->getResultArray();
-
-        $userPermissions = array_column($rows, 'permission');
+        $userPermissions = $this->getUserPermissions((int) $userId);
 
         foreach ($arguments as $required) {
             if (in_array($required, $userPermissions, true)) {
@@ -41,5 +35,33 @@ class PermissionFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null): void
     {
+    }
+
+    protected function getUserPermissions(int $userId): array
+    {
+        $cacheKey = "exauth_user_permissions_{$userId}";
+
+        $cached = cache()->get($cacheKey);
+
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $rows = db_connect()->table('auth_permissions_users')
+            ->select('permission')
+            ->where('user_id', $userId)
+            ->get()
+            ->getResultArray();
+
+        $permissions = array_column($rows, 'permission');
+
+        cache()->save($cacheKey, $permissions, 300);
+
+        return $permissions;
+    }
+
+    public static function invalidate(int $userId): void
+    {
+        cache()->delete("exauth_user_permissions_{$userId}");
     }
 }

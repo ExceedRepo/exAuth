@@ -19,8 +19,14 @@ class exAuth extends BaseConfig
 You can then override any property:
 
 ```php
-public $defaultGroup = 'subscribers';
 public $allowRegistration = false;
+public $activeAuthenticator = 'session';
+public $enableJWT = false;
+public $enableTokens = false;
+public $enableHmac = false;
+public $enableRateLimit = true;
+public $maxLoginAttempts = 5;
+public $loginAttemptHours = 1;
 public $views = [
     'login'    => 'App\Views\auth\login',
     'register' => 'App\Views\auth\register',
@@ -28,6 +34,19 @@ public $views = [
     'reset'    => 'App\Views\auth\reset',
 ];
 ```
+
+### Configuration properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `$allowRegistration` | bool | `true` | Allow users to self-register. |
+| `$activeAuthenticator` | string | `'session'` | Default authenticator: `session`, `tokens`, `jwt`, or `hmac`. |
+| `$enableJWT` | bool | `false` | Expose the JWT token/refresh/me routes. |
+| `$enableTokens` | bool | `false` | Expose the Access Tokens API. |
+| `$enableHmac` | bool | `false` | Enable HMAC signed request verification. |
+| `$enableRateLimit` | bool | `true` | Throttle login attempts to defend against brute-force. |
+| `$maxLoginAttempts` | int | `5` | Max failed login attempts (per IP) before throttling. |
+| `$loginAttemptHours` | int | `1` | Window in hours the attempts are counted over. |
 
 ## Views
 
@@ -37,10 +56,11 @@ See the `$views` property in `exAuth/Config/exAuth.php` for the default view pat
 
 ## Routes
 
-Shield handles route registration automatically via `service('auth')->routes($routes)`.
-To customize routes, publish Shield's AuthRoutes config:
-```bash
-cp vendor/codeigniter4/shield/src/Config/AuthRoutes.php app/Config/
+exAuth handles route registration automatically via `service('auth')->routes($routes)`.
+To customize routes, edit `Config/Routes.php` and adjust the call:
+
+```php
+service('auth')->routes($routes);
 ```
 
 ## Models

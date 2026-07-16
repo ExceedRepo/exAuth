@@ -77,6 +77,15 @@ trait Authorizable
             return;
         }
 
+        $cacheKey = "exauth_user_groups_{$this->id}";
+        $cached   = cache()->get($cacheKey);
+
+        if ($cached !== null) {
+            $this->groupCache = $cached;
+
+            return;
+        }
+
         $rows = db_connect()->table('auth_groups_users')
             ->select('group_id')
             ->where('user_id', $this->id)
@@ -84,6 +93,8 @@ trait Authorizable
             ->getResultArray();
 
         $this->groupCache = array_column($rows, 'group_id');
+
+        cache()->save($cacheKey, $this->groupCache, 300);
     }
 
     protected function populatePermissions(): void
@@ -98,14 +109,25 @@ trait Authorizable
             return;
         }
 
-        // Direct per-user permissions.
-        $rows = db_connect()->table('auth_permissions_users')
-            ->select('permission')
-            ->where('user_id', $this->id)
-            ->get()
-            ->getResultArray();
+        $cacheKey = "exauth_user_permissions_{$this->id}";
+        $cached   = cache()->get($cacheKey);
 
-        $permissions = array_column($rows, 'permission');
+        if ($cached !== null) {
+            // Direct permissions from cache; group-inherited permissions are
+            // computed below so wildcard group grants stay live.
+            $permissions = $cached;
+        } else {
+            // Direct per-user permissions.
+            $rows = db_connect()->table('auth_permissions_users')
+                ->select('permission')
+                ->where('user_id', $this->id)
+                ->get()
+                ->getResultArray();
+
+            $permissions = array_column($rows, 'permission');
+
+            cache()->save($cacheKey, $permissions, 300);
+        }
 
         // Permissions inherited from the user's groups (from AuthGroups config).
         $this->populateGroups();

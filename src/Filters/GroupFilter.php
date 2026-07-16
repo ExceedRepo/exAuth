@@ -20,13 +20,7 @@ class GroupFilter implements FilterInterface
             return null;
         }
 
-        $rows = db_connect()->table('auth_groups_users')
-            ->select('group_id')
-            ->where('user_id', $userId)
-            ->get()
-            ->getResultArray();
-
-        $userGroups = array_column($rows, 'group_id');
+        $userGroups = $this->getUserGroups((int) $userId);
 
         if (array_intersect($arguments, $userGroups) === []) {
             return service('response')->setStatusCode(403)->setJSON([
@@ -39,5 +33,33 @@ class GroupFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null): void
     {
+    }
+
+    protected function getUserGroups(int $userId): array
+    {
+        $cacheKey = "exauth_user_groups_{$userId}";
+
+        $cached = cache()->get($cacheKey);
+
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $rows = db_connect()->table('auth_groups_users')
+            ->select('group_id')
+            ->where('user_id', $userId)
+            ->get()
+            ->getResultArray();
+
+        $groups = array_column($rows, 'group_id');
+
+        cache()->save($cacheKey, $groups, 300);
+
+        return $groups;
+    }
+
+    public static function invalidate(int $userId): void
+    {
+        cache()->delete("exauth_user_groups_{$userId}");
     }
 }

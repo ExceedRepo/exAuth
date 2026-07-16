@@ -32,13 +32,50 @@ class Setup extends BaseCommand
 
     private ContentReplacer $replacer;
 
+    private array $wizardChoices = [];
+
     public function run(array $params): void
     {
         $this->replacer = new ContentReplacer();
 
         $this->sourcePath = __DIR__ . '/../';
 
+        $force = (bool) CLI::getOption('f');
+
+        if (! $force) {
+            $this->runWizard();
+        }
+
         $this->publishConfig();
+    }
+
+    private function runWizard(): void
+    {
+        $this->write(CLI::color('exAuth Interactive Setup', 'yellow'));
+        $this->write('Answer the following to tune your configuration (press Enter for default):', 'blue');
+
+        $this->wizardChoices['allowRegistration'] = $this->promptBoolean(
+            'Enable open registration (user self-signup)?',
+            true,
+        );
+
+        $active = $this->prompt(
+            'Default authenticator (session/tokens/jwt/hmac)?',
+            ['session', 'tokens', 'jwt', 'hmac'],
+        );
+        $this->wizardChoices['activeAuthenticator'] = $active;
+
+        $this->wizardChoices['jwtEnabled'] = $this->promptBoolean('Enable JWT API (token/refresh/me routes)?', false);
+        $this->wizardChoices['tokensEnabled'] = $this->promptBoolean('Enable Access Tokens API?', false);
+        $this->wizardChoices['hmacEnabled'] = $this->promptBoolean('Enable HMAC signed requests?', false);
+        $this->wizardChoices['rateLimitEnabled'] = $this->promptBoolean('Enable login rate limiting (brute-force guard)?', true);
+    }
+
+    private function promptBoolean(string $question, bool $default): bool
+    {
+        $options = $default ? ['y', 'n'] : ['n', 'y'];
+
+        return $this->prompt($question, $options) === 'y';
     }
 
     private function publishConfig(): void
@@ -73,6 +110,63 @@ class Setup extends BaseCommand
         ];
 
         $this->copyAndReplace($file, $replaces);
+
+        $this->applyWizardConfig();
+    }
+
+    private function applyWizardConfig(): void
+    {
+        if ($this->wizardChoices === []) {
+            return;
+        }
+
+        $file = 'Config/exAuth.php';
+        $path = $this->distPath . $file;
+
+        if (! is_file($path)) {
+            return;
+        }
+
+        $content = file_get_contents($path);
+
+        if (isset($this->wizardChoices['allowRegistration'])) {
+            $content = $this->setBoolProperty($content, 'allowRegistration', $this->wizardChoices['allowRegistration']);
+        }
+        if (isset($this->wizardChoices['activeAuthenticator'])) {
+            $content = $this->setStringProperty($content, 'activeAuthenticator', $this->wizardChoices['activeAuthenticator']);
+        }
+        if (isset($this->wizardChoices['jwtEnabled'])) {
+            $content = $this->setBoolProperty($content, 'enableJWT', $this->wizardChoices['jwtEnabled']);
+        }
+        if (isset($this->wizardChoices['tokensEnabled'])) {
+            $content = $this->setBoolProperty($content, 'enableTokens', $this->wizardChoices['tokensEnabled']);
+        }
+        if (isset($this->wizardChoices['hmacEnabled'])) {
+            $content = $this->setBoolProperty($content, 'enableHmac', $this->wizardChoices['hmacEnabled']);
+        }
+        if (isset($this->wizardChoices['rateLimitEnabled'])) {
+            $content = $this->setBoolProperty($content, 'enableRateLimit', $this->wizardChoices['rateLimitEnabled']);
+        }
+
+        if (write_file($path, $content)) {
+            $this->write(CLI::color('  Updated: ', 'green') . clean_path($path));
+        }
+    }
+
+    private function setBoolProperty(string $content, string $name, bool $value): string
+    {
+        $pattern = '/^(\s*public\s+(?:bool|int|string)\s+\$' . $name . '\s*=)(.*);/mu';
+        $replace = '$1 ' . ($value ? 'true' : 'false') . ';';
+
+        return (string) preg_replace($pattern, $replace, $content);
+    }
+
+    private function setStringProperty(string $content, string $name, string $value): string
+    {
+        $pattern = '/^(\s*public\s+(?:bool|int|string)\s+\$' . $name . '\s*=)(.*);/mu';
+        $replace = '$1 \'' . $value . '\';';
+
+        return (string) preg_replace($pattern, $replace, $content);
     }
 
     private function publishConfigAuthGroups(): void

@@ -7,6 +7,7 @@ return [
     'logInInvalid'      => 'Username atau password salah.',
     'logInLocked'       => 'Akun terkunci.',
     'logInNotActive'    => 'Akun tidak aktif.',
+    'logInTooManyAttempts' => 'Terlalu banyak percobaan masuk. Silakan coba lagi dalam %d detik.',
     'logOutSuccess'     => 'Berhasil keluar.',
     'registerSuccess'   => 'Berhasil mendaftar.',
     'registerDisabled'  => 'Pendaftaran tidak tersedia.',

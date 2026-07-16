@@ -21,7 +21,21 @@ This interactive command does the following automatically:
 5. **Checks email config** — prompts for `$fromEmail` and `$fromName` if empty
 6. **Runs migrations** — optionally runs `spark migrate --all`
 
-Use `-f` to force overwrite existing files:
+### Interactive configuration wizard
+
+When run without `-f`, `exauth:setup` asks a few questions to tune your
+`app/Config/exAuth.php` (press Enter to accept the default):
+
+- **Enable open registration?** — sets `$allowRegistration`.
+- **Default authenticator?** — `session` / `tokens` / `jwt` / `hmac`, sets `$activeAuthenticator`.
+- **Enable JWT API?** — sets `$enableJWT`.
+- **Enable Access Tokens API?** — sets `$enableTokens`.
+- **Enable HMAC signed requests?** — sets `$enableHmac`.
+- **Enable login rate limiting?** — sets `$enableRateLimit`.
+
+The answers are written into the published `app/Config/exAuth.php`.
+
+Use `-f` to force overwrite existing files (skips the wizard):
 
 ```bash
 php spark exauth:setup -f

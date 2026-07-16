@@ -97,6 +97,21 @@ This command automatically:
 > The final “Run migrate now?” prompt **can be skipped** (answer `n`) because we run
 > migrations ourselves in the next step.
 
+### 5a. Interactive configuration (without `-f`)
+
+If you run `exauth:setup` **without** `-f`, it launches an interactive wizard
+that asks a few questions and writes the answers into your `app/Config/exAuth.php`:
+
+- Enable open registration? (`$allowRegistration`)
+- Default authenticator? session / tokens / jwt / hmac (`$activeAuthenticator`)
+- Enable JWT API? (`$enableJWT`)
+- Enable Access Tokens API? (`$enableTokens`)
+- Enable HMAC signed requests? (`$enableHmac`)
+- Enable login rate limiting? (`$enableRateLimit`)
+
+Press Enter on any prompt to accept the default. Use `-f` for a fully
+non-interactive install (skips the wizard).
+
 ### 5b. Manual setup (only if the command fails)
 
 If `exauth:setup` cannot run for some reason, do these 4 things by hand:
@@ -363,6 +378,26 @@ $db->table('auth_permissions_users')->insert(['user_id' => $userId, 'permission'
 > **Note:** exAuth does not ship a `service('authorization')` facade. Authorization
 > checks are done through the User entity (`inGroup()` / `can()`) and the
 > `group:` / `permission:` route filters shown below.
+
+> **Caching:** exAuth caches each user's groups/permissions for 5 minutes via
+> CI4's `cache` service (`exauth_user_groups_{id}` / `exauth_user_permissions_{id}`).
+> The CLI `addgroup` / `removegroup` / `create -g` commands clear the cache
+> automatically. If you assign groups/permissions by a direct DB insert (above),
+> clear the cache manually:
+>
+> ```php
+> cache()->delete("exauth_user_groups_{$userId}");
+> cache()->delete("exauth_user_permissions_{$userId}");
+> ```
+
+### 10.2c Social login (Google) — optional sub-package
+
+If you want "Login with Google", install the separate package
+[`exceed/exauth-oauth`](https://github.com/ExceedRepo/exauth-oauth) (Google-only
+in phase 1). It does NOT modify exAuth core — it only adds an OAuth identity
+type, routes, and a service. See its beginner guide
+`exauth-oauth/docs/EXAUTH_BEGINNER_OAUTH_SETUP.md` for the full walkthrough
+(including creating Google Cloud credentials first).
 
 ### 10.3 Protect routes by group / permission
 

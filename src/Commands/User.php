@@ -9,6 +9,7 @@ use exAuth\Commands\Exceptions\CancelException;
 use exAuth\Config\AuthGroups;
 use exAuth\Entities\User as UserEntity;
 use exAuth\Exceptions\UserNotFoundException;
+use exAuth\Filters\GroupFilter;
 use exAuth\Models\UserModel;
 
 class User extends BaseCommand
@@ -148,6 +149,7 @@ class User extends BaseCommand
                 'user_id'  => $userId,
                 'group_id' => $group,
             ]);
+            GroupFilter::invalidate($userId);
             $this->write('User "' . $username . '" created and added to group "' . $group . '".', 'green');
         } else {
             $this->write('User "' . $username . '" created.', 'green');
@@ -299,6 +301,7 @@ class User extends BaseCommand
                 ]);
             }
 
+            GroupFilter::invalidate((int) $user->id);
             $this->write('User "' . $user->username . '" added to group "' . $group . '"', 'green');
         } else {
             $this->write(
@@ -331,6 +334,7 @@ class User extends BaseCommand
                 ->where('group_id', $group)
                 ->delete();
 
+            GroupFilter::invalidate((int) $user->id);
             $this->write('User "' . $user->username . '" removed from group "' . $group . '"', 'green');
         } else {
             $this->write('Removal of the user "' . $user->username . '" from the group "' . $group . '" cancelled', 'yellow');

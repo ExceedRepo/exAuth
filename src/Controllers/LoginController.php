@@ -7,6 +7,7 @@ namespace exAuth\Controllers;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\I18n\Time;
+use CodeIgniter\Throttle\Throttler;
 use exAuth\Authentication\Authenticators\Session;
 use exAuth\Entities\User;
 use exAuth\Models\UserIdentityModel;
@@ -41,6 +42,20 @@ class LoginController extends Controller
     private function loginPost(): RedirectResponse
     {
         $password = (string) ($this->request->getPost('password') ?? '');
+
+        $authConfig = config('exAuth');
+
+        if ($authConfig->enableRateLimit) {
+            $throttler = service('throttler');
+            $ip        = $this->request->getIPAddress();
+            $key       = 'login_' . $ip;
+
+            if ($throttler->check($key, $authConfig->maxLoginAttempts, $authConfig->loginAttemptHours * 3600) === false) {
+                $seconds = $throttler->getTokenTime();
+                return redirect()->back()->withInput()
+                    ->with('error', lang('exAuth.logInTooManyAttempts', [$seconds]));
+            }
+        }
 
         // Determine which field(s) are allowed for login, driven by Config/exAuth.
         $authConfig       = config('exAuth');

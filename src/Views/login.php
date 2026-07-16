@@ -35,7 +35,9 @@
 
                 <p class="text-center mb-1"><a href="<?= url_to('forgot-password') ?>">Forgot your password?</a></p>
                 <p class="text-center mb-1"><a href="<?= url_to('magic-link') ?>">Login with magic link</a></p>
+                <?php if (config('exAuth')->allowRegistration) : ?>
                 <p class="text-center">Need an account? <a href="<?= url_to('register') ?>">Register</a></p>
+                <?php endif ?>
             </form>
         </div>
     </div>
