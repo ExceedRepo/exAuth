@@ -36,7 +36,18 @@ class LoginController extends Controller
             return $this->loginPost();
         }
 
-        return view('exAuth\login');
+        return $this->renderView('login');
+    }
+
+    protected function renderView(string $name): string
+    {
+        $override = APPPATH . 'Views/exAuth/' . $name . '.php';
+
+        if (file_exists($override)) {
+            return view('exAuth\\' . $name);
+        }
+
+        return view('exAuth\\Views\\' . $name);
     }
 
     private function loginPost(): RedirectResponse
