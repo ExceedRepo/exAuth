@@ -12,9 +12,12 @@ use exAuth\Authentication\Authenticators\Session;
 use exAuth\Entities\User;
 use exAuth\Models\UserIdentityModel;
 use exAuth\Models\UserModel;
+use exAuth\Traits\RendersViews;
 
 class LoginController extends Controller
 {
+    use RendersViews;
+
     private $userProvider;
     private $identityProvider;
 
@@ -39,17 +42,6 @@ class LoginController extends Controller
         return $this->renderView('login');
     }
 
-    protected function renderView(string $name): string
-    {
-        $override = APPPATH . 'Views/exAuth/' . $name . '.php';
-
-        if (file_exists($override)) {
-            return view('exAuth/' . $name);
-        }
-
-        return view('exAuth\\Views\\' . $name);
-    }
-
     private function loginPost(): RedirectResponse
     {
         $password = (string) ($this->request->getPost('password') ?? '');
@@ -59,7 +51,7 @@ class LoginController extends Controller
         if ($authConfig->enableRateLimit) {
             $throttler = service('throttler');
             $ip        = $this->request->getIPAddress();
-            $key       = 'login_' . $ip;
+            $key       = 'login_' . md5($ip);
 
             if ($throttler->check($key, $authConfig->maxLoginAttempts, $authConfig->loginAttemptHours * 3600) === false) {
                 $seconds = $throttler->getTokenTime();
@@ -146,7 +138,7 @@ class LoginController extends Controller
             return $this->forgotPasswordPost();
         }
 
-        return view('exAuth\forgot_password');
+        return $this->renderView('forgot_password');
     }
 
     private function forgotPasswordPost(): RedirectResponse
@@ -182,7 +174,7 @@ class LoginController extends Controller
             return $this->resetPasswordPost();
         }
 
-        return view('exAuth\reset_password', ['token' => $token]);
+        return $this->renderView('reset_password', ['token' => $token]);
     }
 
     private function resetPasswordPost(): RedirectResponse
@@ -223,7 +215,7 @@ class LoginController extends Controller
             return $this->verifyPost();
         }
 
-        return view('exAuth\verify', ['token' => $token]);
+        return $this->renderView('verify', ['token' => $token]);
     }
 
     private function verifyPost(): RedirectResponse

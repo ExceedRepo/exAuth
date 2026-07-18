@@ -9,9 +9,12 @@ use CodeIgniter\HTTP\RedirectResponse;
 use exAuth\Authentication\Authenticators\Session;
 use exAuth\Entities\User;
 use exAuth\Models\UserModel;
+use exAuth\Traits\RendersViews;
 
 class RegisterController extends Controller
 {
+    use RendersViews;
+
     private $userProvider;
 
     public function __construct()
@@ -35,7 +38,7 @@ class RegisterController extends Controller
             return $this->registerPost();
         }
 
-        return view('exAuth\register');
+        return $this->renderView('register');
     }
 
     private function registerPost(): RedirectResponse

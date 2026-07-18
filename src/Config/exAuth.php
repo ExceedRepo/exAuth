@@ -6,11 +6,13 @@ class exAuth
     public array $actions = ['login' => null, 'register' => null];
     public string $viewPrefix = 'exAuth\\Views\\';
     public array $views = [
-        'login'      => 'login',
-        'register'   => 'register',
-        'forgot'     => 'forgot',
-        'reset'      => 'reset',
-        'emailMagic' => 'emailMagic',
+        'login'            => 'login',
+        'register'         => 'register',
+        'forgot_password'  => 'forgot_password',
+        'reset_password'   => 'reset_password',
+        'verify'           => 'verify',
+        'magic_link_form'  => 'magic_link_form',
+        'magic_link_sent'  => 'magic_link_sent',
     ];
     public bool $allowRegistration = true;
     public string $activeAuthenticator = 'session';

@@ -11,9 +11,12 @@ use exAuth\Authentication\Authenticators\Session;
 use exAuth\Entities\User;
 use exAuth\Models\UserIdentityModel;
 use exAuth\Models\UserModel;
+use exAuth\Traits\RendersViews;
 
 class MagicLinkController extends Controller
 {
+    use RendersViews;
+
     private $userProvider;
     private $identityModel;
 
@@ -31,7 +34,7 @@ class MagicLinkController extends Controller
             return redirect()->to('/');
         }
 
-        return view('exAuth\magic_link_form');
+        return $this->renderView('magic_link_form');
     }
 
     public function sendLink(): RedirectResponse
@@ -56,7 +59,7 @@ class MagicLinkController extends Controller
             'expires_at' => Time::now()->addMinutes(15)->toDateTimeString(),
         ]);
 
-        return view('exAuth\magic_link_sent');
+        return $this->renderView('magic_link_sent');
     }
 
     public function verifyLink(): RedirectResponse

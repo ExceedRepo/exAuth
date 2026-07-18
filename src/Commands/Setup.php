@@ -269,7 +269,11 @@ class Setup extends BaseCommand
 
         $config     = new AutoloadConfig();
         $helpers    = $config->helpers;
-        $newHelpers = array_unique(array_merge($helpers, ['exAuth', 'setting']));
+        $newHelpers = array_unique(array_merge($helpers, ['exAuth']));
+
+        if (class_exists('CodeIgniter\Settings\Settings')) {
+            $newHelpers[] = 'setting';
+        }
 
         $content = file_get_contents($path);
         $output  = $this->updateAutoloadHelpers($content, $newHelpers);
